@@ -1,21 +1,20 @@
 import type { Request, Response } from "express";
-import { loginSchema } from "../validation/auth.schema";
-import { validateUser } from "../service/auth.service";
+import { registerSchema } from "../validation/auth.schema";
+import { createUser } from "../service/auth.service";
 import { signAccessToken } from "../../utils/jwt";
 import { validate } from "../../utils/validate";
 
-export async function loginController(req: Request, res: Response) {
-  const result = validate(loginSchema, req.body);
+export async function registerController(req: Request, res: Response) {
+  const result = validate(registerSchema, req.body) 
   if (!result.success) {
-    return res.status(400).json({
-      success: false,
+    throw Object.assign(new Error("Validation failed"), {
+      status: 400,
       errors: result.errors,
     });
   }
-  const { email, password } = result.data ;
+  const { email, password, name } = result.data
 
-  // Validate credentials — throws 401 on failure (caught by Express 5)
-  const user = await validateUser(email, password);
+  const user = await createUser({ email, password, name });
 
   const token = signAccessToken({
     userId: user.id,
@@ -23,7 +22,6 @@ export async function loginController(req: Request, res: Response) {
     role: user.role,
   });
 
-  // Set httpOnly cookie for web clients, also return JSON for mobile/API
   res.cookie("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -31,7 +29,7 @@ export async function loginController(req: Request, res: Response) {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
-  res.json({
+  res.status(201).json({
     success: true,
     token,
     user: {
