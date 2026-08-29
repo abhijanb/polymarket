@@ -31,6 +31,11 @@ test("hello world", () => {
 });
 ```
 
+## Frontend — Component Guidelines
+
+* Do not create shared components that merely wrap native elements (`button`, `input`, `select`, `textarea`, etc.). Existing `frontend/src/shared/components/ui/button.tsx:21` and `input.tsx:4` are legacy — keep for current consumers but use native `<button>`/`<input>` + `cn()` + Tailwind for new code.
+* Prefer composite/layout components (`card.tsx:4`, `badge.tsx:2`, `empty-state.tsx:14`, `layout/*`) in `shared/components/ui/` and `shared/components/layout/`.
+
 ## Frontend
 
 Use HTML imports with `Bun.serve()`. Don't use `vite`. HTML imports fully support React, CSS, Tailwind.
