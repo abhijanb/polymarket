@@ -6,10 +6,12 @@ export function Header() {
   const { user, handleLogout } = useLogout();
   const navigate = useNavigate();
 
+  const homePath = user?.role === "ADMIN" ? "/admin" : user?.role === "USER" ? "/user" : "/";
+
   return (
     <header className="sticky top-0 z-40 backdrop-blur-xl bg-black/70 border-b border-zinc-800">
       <div className="mx-auto max-w-[1280px] px-4 h-[64px] flex items-center gap-4">
-        <Link to="/" className="flex items-center gap-2 shrink-0">
+        <Link to={homePath} className="flex items-center gap-2 shrink-0">
           <div className="h-8 w-8 rounded-lg bg-white text-black grid place-items-center font-black text-sm">P</div>
           <span className="font-bold tracking-tight text-[19px]">polymarket</span>
           <span className="hidden sm:inline text-[10px] font-bold tracking-widest text-zinc-500 border border-zinc-800 rounded px-1.5 py-0.5 ml-1">BETA</span>

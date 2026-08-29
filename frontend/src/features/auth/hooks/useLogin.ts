@@ -14,8 +14,9 @@ export function useLogin() {
   const onSubmit = async (data: LoginInput) => {
     setServerError(null);
     try {
-      await login({ email: data.email, password: data.password }).unwrap();
-      navigate("/");
+      const res = await login({ email: data.email, password: data.password }).unwrap();
+      const role = res.user.role;
+      navigate(role === "ADMIN" ? "/admin" : "/user");
     } catch (e: any) {
       const msg = e?.data?.errors?.[0]?.message || e?.data?.message || e?.message || "Invalid credentials";
       setServerError(msg);

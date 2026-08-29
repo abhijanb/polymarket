@@ -14,8 +14,9 @@ export function useRegister() {
   const onSubmit = async (data: RegisterInput) => {
     setServerError(null);
     try {
-      await registerMut({ email: data.email, password: data.password, name: data.name || undefined }).unwrap();
-      navigate("/");
+      const res = await registerMut({ email: data.email, password: data.password, name: data.name || undefined }).unwrap();
+      const role = res.user.role;
+      navigate(role === "ADMIN" ? "/admin" : "/user");
     } catch (e: any) {
       const msg = e?.data?.errors?.[0]?.message || e?.data?.message || e?.message || "Registration failed";
       setServerError(msg);
