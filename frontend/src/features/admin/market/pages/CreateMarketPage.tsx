@@ -1,6 +1,6 @@
-import { MarketPreview } from "@/features/market/components/MarketPreview";
-import { CreateMarketForm } from "@/features/market/components/form/CreateMarketForm";
-import { useCreateMarket } from "@/features/market/hooks/useCreateMarket";
+import { MarketPreview } from "@/features/admin/market/components/MarketPreview";
+import { CreateMarketForm } from "@/features/admin/market/components/form/CreateMarketForm";
+import { useCreateMarket } from "@/features/admin/market/hooks/useCreateMarket";
 
 export function CreateMarketPage() {
   const { title, setTitle, category, setCategory, resolutionDate, setResolutionDate, oracleUrl, setOracleUrl, description, setDescription, handleLaunch, handleSaveDraft } = useCreateMarket();

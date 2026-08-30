@@ -55,10 +55,20 @@ export function AdminLayout() {
             <span className="material-symbols-outlined text-[20px]">stacked_line_chart</span>
             <span className="text-[14px] font-medium">Markets</span>
           </NavLink>
-          <a className="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors active:opacity-80" href="#" onClick={(e) => e.preventDefault()} style={{ fontFamily: "JetBrains Mono" }}>
+          <NavLink
+            to="/admin/users"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-6 py-3 border-l-2 ${
+                isActive
+                  ? "bg-surface-container-highest text-primary border-primary"
+                  : "text-on-surface-variant hover:bg-surface-container-low border-transparent"
+              } active:opacity-80`
+            }
+            style={{ fontFamily: "JetBrains Mono" }}
+          >
             <span className="material-symbols-outlined text-[20px]">group</span>
             <span className="text-[14px] font-medium">Users</span>
-          </a>
+          </NavLink>
           <a className="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors active:opacity-80" href="#" onClick={(e) => e.preventDefault()} style={{ fontFamily: "JetBrains Mono" }}>
             <span className="material-symbols-outlined text-[20px]">monitor_heart</span>
             <span className="text-[14px] font-medium">System Health</span>

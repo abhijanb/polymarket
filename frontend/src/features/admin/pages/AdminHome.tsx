@@ -1,4 +1,4 @@
-import { useGetMarketsQuery } from "@/features/market/api/marketApi";
+import { useGetMarketsQuery } from "@/features/admin/market/api/marketApi";
 import type { Market } from "@/shared/types/market";
 
 export function AdminHome() {

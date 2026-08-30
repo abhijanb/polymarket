@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { authRouter } from "./src/features/auth/route";
 import { marketRouter } from "./src/features/market/route";
+import { userRouter } from "./src/features/user/route";
 import { meController } from "./src/features/auth/controller/meController";
 import { errorHandler } from "./src/middlewares/errorHandler";
 import { prisma } from "./src/lib/prisma";
@@ -29,6 +30,7 @@ app.use(cookieParser());
 // Example: authRouter.post("/login", async (req,res) => { throw/reject -> next(err) })
 app.use("/api/auth", authRouter);
 app.use("/api/market", marketRouter);
+app.use("/api/users", userRouter);
 
 app.get("/health", async (_req, res) => {
   try {
