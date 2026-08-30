@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -11,6 +9,42 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Category {
+  Crypto
+  Politics
+  Economics
+  Sports
+  Science
+}
+
+enum MarketStatus {
+  DRAFT
+  ACTIVE
+  RESOLVED
+  CLOSED
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum OrderStatus {
+  OPEN
+  PARTIAL
+  FILLED
+  CANCELLED
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
 
 model User {
   id        String   @id @default(cuid())
@@ -21,11 +55,135 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  markets    Market[]
+  orders     Order[]
+  positions  Position[]
+  buyTrades  Trade[]    @relation("TradeBuyer")
+  sellTrades Trade[]    @relation("TradeSeller")
+
   @@index([email])
   @@map("users")
 }
 
-enum Role {
-  USER
-  ADMIN
+model Market {
+  id                String       @id @default(cuid())
+  title             String
+  description       String
+  category          Category
+  resolutionDate    DateTime
+  oracleUrl         String
+  status            MarketStatus @default(DRAFT)
+  resolvedAt        DateTime?
+  resolvedOutcomeId String?
+  resolvedOutcome   Outcome?     @relation("MarketResolution", fields: [resolvedOutcomeId], references: [id])
+  creatorId         String
+  creator           User         @relation(fields: [creatorId], references: [id])
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  outcomes  Outcome[]  @relation("MarketOutcomes")
+  orders    Order[]
+  trades    Trade[]
+  positions Position[]
+
+  @@index([creatorId])
+  @@index([status])
+  @@index([category])
+  @@map("markets")
+}
+
+/// A single possible outcome within a market (e.g. "YES" / "NO", or a candidate name).
+model Outcome {
+  id          String   @id @default(cuid())
+  marketId    String
+  market      Market   @relation("MarketOutcomes", fields: [marketId], references: [id], onDelete: Cascade)
+  label       String
+  /// Implied probability (0–1, four decimal places)
+  probability Decimal  @default(0.5) @db.Decimal(5, 4)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orders          Order[]
+  positions       Position[]
+  trades          Trade[]
+  resolvedMarkets Market[] @relation("MarketResolution")
+
+  @@index([marketId])
+  @@map("outcomes")
+}
+
+/// A limit order placed by a user to buy or sell shares of an outcome.
+model Order {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  marketId  String
+  market    Market      @relation(fields: [marketId], references: [id])
+  outcomeId String
+  outcome   Outcome     @relation(fields: [outcomeId], references: [id])
+  side      OrderSide
+  /// Limit price as a probability (0.0001 – 0.9999)
+  price     Decimal     @db.Decimal(5, 4)
+  /// Total share amount requested
+  amount    Decimal     @db.Decimal(14, 2)
+  /// Shares filled so far
+  filled    Decimal     @default(0) @db.Decimal(14, 2)
+  status    OrderStatus @default(OPEN)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  buyTrades  Trade[] @relation("BuyOrder")
+  sellTrades Trade[] @relation("SellOrder")
+
+  @@index([userId])
+  @@index([marketId, outcomeId, status])
+  @@map("orders")
+}
+
+/// Records each matched fill between a buy and a sell order.
+model Trade {
+  id          String   @id @default(cuid())
+  marketId    String
+  market      Market   @relation(fields: [marketId], references: [id])
+  outcomeId   String
+  outcome     Outcome  @relation(fields: [outcomeId], references: [id])
+  buyOrderId  String
+  buyOrder    Order    @relation("BuyOrder", fields: [buyOrderId], references: [id])
+  sellOrderId String
+  sellOrder   Order    @relation("SellOrder", fields: [sellOrderId], references: [id])
+  buyerId     String
+  buyer       User     @relation("TradeBuyer", fields: [buyerId], references: [id])
+  sellerId    String
+  seller      User     @relation("TradeSeller", fields: [sellerId], references: [id])
+  price       Decimal  @db.Decimal(5, 4)
+  amount      Decimal  @db.Decimal(14, 2)
+  createdAt   DateTime @default(now())
+
+  @@index([marketId])
+  @@index([outcomeId])
+  @@index([buyerId])
+  @@index([sellerId])
+  @@map("trades")
+}
+
+/// Tracks the net shares a user holds in a particular outcome.
+model Position {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  marketId  String
+  market    Market   @relation(fields: [marketId], references: [id])
+  outcomeId String
+  outcome   Outcome  @relation(fields: [outcomeId], references: [id])
+  /// Net shares held (negative = short)
+  shares    Decimal  @db.Decimal(14, 6)
+  /// Volume-weighted average entry price
+  avgPrice  Decimal  @db.Decimal(5, 4)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, outcomeId])
+  @@index([userId])
+  @@index([marketId])
+  @@map("positions")
 }

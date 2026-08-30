@@ -2,8 +2,9 @@ import { startSocket } from "abhijanb";
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { authRouter } from "./src/auth/route";
-import { meController } from "./src/auth/controller/meController";
+import { authRouter } from "./src/features/auth/route";
+import { marketRouter } from "./src/features/market/route";
+import { meController } from "./src/features/auth/controller/meController";
 import { errorHandler } from "./src/middlewares/errorHandler";
 import { prisma } from "./src/lib/prisma";
 
@@ -27,6 +28,7 @@ app.use(cookieParser());
 // Routes — Express 5 handles async handlers natively, no wrapper needed
 // Example: authRouter.post("/login", async (req,res) => { throw/reject -> next(err) })
 app.use("/api/auth", authRouter);
+app.use("/api/market", marketRouter);
 
 app.get("/health", async (_req, res) => {
   try {

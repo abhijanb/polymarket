@@ -1,10 +1,9 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 
 export function Header() {
   const { user, handleLogout } = useLogout();
-  const navigate = useNavigate();
 
   const homePath = user?.role === "ADMIN" ? "/admin" : user?.role === "USER" ? "/user" : "/";
 
@@ -32,8 +31,12 @@ export function Header() {
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>Log in</Button>
-              <Button size="sm" onClick={() => navigate("/register")}>Sign up</Button>
+              <Link to="/login">
+                <Button variant="ghost" size="sm">Log in</Button>
+              </Link>
+              <Link to="/register">
+                <Button size="sm">Sign up</Button>
+              </Link>
             </>
           )}
         </div>

@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 import { loginSchema } from "../validation/auth.schema";
 import { validateUser } from "../service/auth.service";
-import { signAccessToken } from "../../utils/jwt";
-import { validate } from "../../utils/validate";
+import { signAccessToken } from "../../../utils/jwt";
+import { validate } from "../../../utils/validate";
 
 export async function loginController(req: Request, res: Response) {
   const result = validate(loginSchema, req.body);

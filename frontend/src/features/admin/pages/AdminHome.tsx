@@ -1,40 +1,256 @@
-import { useAppSelector } from "@/shared/store/hooks";
-import { useLogout } from "@/features/auth/hooks/useLogout";
-import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
+import { useGetMarketsQuery } from "@/features/market/api/marketApi";
+import type { Market } from "@/shared/types/market";
 
 export function AdminHome() {
-  const user = useAppSelector((s) => s.auth.user);
-  const { handleLogout, isLoading } = useLogout();
-
-  if (!user) return null;
+  const { data: markets = [], isLoading } = useGetMarketsQuery();
+  const latestMarkets = [...markets]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 8);
 
   return (
-    <div className="max-w-[640px] mx-auto pt-10 space-y-6">
-      <Card>
-        <CardHeader>
+    <>
+      {/* 1. Header: Exchange Overview KPIs */}
+      <section className="grid grid-cols-3 gap-4">
+        <div className="bento-card flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold">Admin Dashboard</h1>
-            <span className="text-[10px] font-bold tracking-widest bg-violet-600 text-white px-2 py-0.5 rounded">ADMIN</span>
+            <span className="material-symbols-outlined text-on-surface-variant text-[20px]">group</span>
+            <span className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant uppercase" style={{ fontFamily: "JetBrains Mono" }}>
+              Active Markets
+            </span>
           </div>
-          <p className="text-sm text-zinc-400">Privileged view — {user.email}</p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 space-y-2">
-            <div className="flex justify-between text-sm"><span className="text-zinc-500">Email</span><span className="font-medium">{user.email}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-zinc-500">Name</span><span className="font-medium">{user.name || "—"}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-zinc-500">Role</span><span className="font-medium text-violet-400">{user.role}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-zinc-500">ID</span><span className="font-mono text-xs truncate max-w-[180px]">{user.id}</span></div>
+          <span className="text-[32px] leading-[1.2] tracking-[-0.02em] font-bold text-on-surface" style={{ fontFamily: "Inter" }}>
+            {markets.filter((m: Market) => m.status === "ACTIVE").length}
+          </span>
+          <div className="flex items-center gap-1 text-on-surface-variant text-[12px] font-medium" style={{ fontFamily: "JetBrains Mono" }}>
+            <span>{markets.length} total</span>
           </div>
-          <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4">
-            <p className="text-sm text-zinc-300">Admin actions placeholder</p>
-            <p className="text-xs text-zinc-500 mt-1">Manage users, markets, or seed data. Protect this route via RequireRole.</p>
+        </div>
+        <div className="bento-card flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-on-surface-variant text-[20px]">new_releases</span>
+            <span className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant uppercase" style={{ fontFamily: "JetBrains Mono" }}>
+              New Markets
+            </span>
           </div>
-          <Button variant="outline" className="w-full" onClick={handleLogout} disabled={isLoading}>
-            {isLoading ? "Logging out..." : "Log out"}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+          <span className="text-[32px] leading-[1.2] tracking-[-0.02em] font-bold text-on-surface" style={{ fontFamily: "Inter" }}>
+            {markets.filter((m: Market) => m.status === "DRAFT").length}
+          </span>
+          <div className="flex items-center gap-1 text-on-surface-variant text-[12px] font-medium" style={{ fontFamily: "JetBrains Mono" }}>
+            <span>Pending launch</span>
+          </div>
+        </div>
+        <div className="bento-card flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-on-surface-variant text-[20px]">task_alt</span>
+            <span className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant uppercase" style={{ fontFamily: "JetBrains Mono" }}>
+              Resolved
+            </span>
+          </div>
+          <span className="text-[32px] leading-[1.2] tracking-[-0.02em] font-bold text-on-surface" style={{ fontFamily: "Inter" }}>
+            {markets.filter((m: Market) => m.status === "RESOLVED").length}
+          </span>
+          <div className="flex items-center gap-1 text-on-surface-variant text-[12px] font-medium" style={{ fontFamily: "JetBrains Mono" }}>
+            <span>Completed</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content Area: Bento Grid */}
+      <section className="terminal-bento grid grid-cols-12 flex-1">
+        {/* Left/Center Column (8 col span): Market Resolution & Orders */}
+        <div className="col-span-8 flex flex-col gap-px bg-[#E2E8F0]">
+          {/* 2. Latest Markets */}
+          <div className="bento-card flex-1 flex flex-col">
+            <div className="flex justify-between items-end border-b border-outline-variant pb-2 mb-4">
+              <h2 className="text-[20px] leading-[1.4] font-semibold text-on-surface" style={{ fontFamily: "Inter" }}>
+                Latest Markets
+              </h2>
+              <span className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant" style={{ fontFamily: "JetBrains Mono" }}>
+                MOST RECENTLY CREATED
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {isLoading ? (
+                <div className="p-4 text-center text-on-surface-variant">Loading markets...</div>
+              ) : latestMarkets.length === 0 ? (
+                <div className="p-4 text-center text-on-surface-variant">No markets yet. Create one to get started.</div>
+              ) : (
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2 font-normal w-1/2" style={{ fontFamily: "JetBrains Mono" }}>
+                        MARKET TITLE
+                      </th>
+                      <th className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2 font-normal" style={{ fontFamily: "JetBrains Mono" }}>
+                        CATEGORY
+                      </th>
+                      <th className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2 font-normal" style={{ fontFamily: "JetBrains Mono" }}>
+                        STATUS
+                      </th>
+                      <th className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2 font-normal" style={{ fontFamily: "JetBrains Mono" }}>
+                        CREATED
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-[12px]" style={{ fontFamily: "JetBrains Mono" }}>
+                    {latestMarkets.map((market: Market) => (
+                      <tr key={market.id} className="data-table-row hover:bg-surface-container-high transition-colors">
+                        <td className="py-3 text-on-surface">{market.title}</td>
+                        <td className="py-3 text-on-surface-variant">{market.category}</td>
+                        <td className="py-3">
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold border ${
+                            market.status === "ACTIVE" ? "bg-secondary/20 text-secondary border-secondary/30" :
+                            market.status === "DRAFT" ? "bg-surface-container-high text-on-surface-variant border-outline-variant" :
+                            market.status === "RESOLVED" ? "bg-primary/20 text-primary border-primary/30" :
+                            "bg-tertiary/20 text-tertiary border-tertiary/30"
+                          }`} style={{ fontFamily: "JetBrains Mono" }}>
+                            {market.status}
+                          </span>
+                        </td>
+                        <td className="py-3 text-on-surface-variant">
+                          {new Date(market.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+
+          {/* 5. Recent Markets */}
+          <div className="bento-card h-[300px] flex flex-col">
+            <div className="flex justify-between items-end border-b border-outline-variant pb-2 mb-4">
+              <h2 className="text-[20px] leading-[1.4] font-semibold text-on-surface" style={{ fontFamily: "Inter" }}>
+                Recent Markets
+              </h2>
+              <span className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant" style={{ fontFamily: "JetBrains Mono" }}>
+                LATEST 5
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {isLoading ? (
+                <div className="p-4 text-center text-on-surface-variant">Loading...</div>
+              ) : latestMarkets.length === 0 ? (
+                <div className="p-4 text-center text-on-surface-variant">No markets yet</div>
+              ) : (
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2 font-normal w-1/2" style={{ fontFamily: "JetBrains Mono" }}>
+                        TITLE
+                      </th>
+                      <th className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2 font-normal" style={{ fontFamily: "JetBrains Mono" }}>
+                        STATUS
+                      </th>
+                      <th className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2 font-normal text-right" style={{ fontFamily: "JetBrains Mono" }}>
+                        CREATED
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-[12px]" style={{ fontFamily: "JetBrains Mono" }}>
+                    {latestMarkets.slice(0, 5).map((market: Market) => (
+                      <tr key={market.id} className="data-table-row hover:bg-surface-container-high transition-colors">
+                        <td className="py-2.5 text-on-surface">{market.title}</td>
+                        <td className="py-2.5">
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-bold border ${
+                            market.status === "ACTIVE" ? "bg-secondary/20 text-secondary border-secondary/30" :
+                            market.status === "DRAFT" ? "bg-surface-container-high text-on-surface-variant border-outline-variant" :
+                            market.status === "RESOLVED" ? "bg-primary/20 text-primary border-primary/30" :
+                            "bg-tertiary/20 text-tertiary border-tertiary/30"
+                          }`} style={{ fontFamily: "JetBrains Mono" }}>
+                            {market.status}
+                          </span>
+                        </td>
+                        <td className="py-2.5 text-on-surface-variant text-right">
+                          {new Date(market.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column (4 col span): System Health & Liquidity */}
+        <div className="col-span-4 flex flex-col gap-px bg-[#E2E8F0]">
+          <div className="bento-card h-[250px] flex flex-col">
+            <div className="flex justify-between items-end border-b border-outline-variant pb-2 mb-4">
+              <h2 className="text-[20px] leading-[1.4] font-semibold text-on-surface" style={{ fontFamily: "Inter" }}>
+                System Health
+              </h2>
+              <span className="text-[10px] tracking-[0.05em] font-bold text-secondary flex items-center gap-1" style={{ fontFamily: "JetBrains Mono" }}>
+                <span className="w-2 h-2 rounded-full bg-secondary inline-block animate-pulse" /> ALL SYSTEMS NOMINAL
+              </span>
+            </div>
+            <div className="flex flex-col gap-2.5 text-[14px] font-medium" style={{ fontFamily: "JetBrains Mono" }}>
+              <div className="flex items-center justify-between p-2.5 border border-outline-variant rounded-sm bg-surface hover:bg-surface-container-high transition-colors">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-secondary text-[18px]">bolt</span>
+                  <span className="text-on-surface">Matching Engine</span>
+                </div>
+                <span className="text-secondary font-bold">UP (12ms)</span>
+              </div>
+              <div className="flex items-center justify-between p-2.5 border border-outline-variant rounded-sm bg-surface hover:bg-surface-container-high transition-colors">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-secondary text-[18px]">storage</span>
+                  <span className="text-on-surface">Persistence Layer</span>
+                </div>
+                <span className="text-secondary font-bold">UP (4ms)</span>
+              </div>
+              <div className="flex items-center justify-between p-2.5 border border-outline-variant rounded-sm bg-surface hover:bg-surface-container-high transition-colors">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-secondary text-[18px]">hub</span>
+                  <span className="text-on-surface">Message Broker</span>
+                </div>
+                <span className="text-secondary font-bold">UP</span>
+              </div>
+              <div className="flex items-center justify-between p-2.5 border border-tertiary-container rounded-sm bg-surface-container-highest hover:bg-surface-container-high transition-colors">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-tertiary text-[18px] animate-pulse">sync</span>
+                  <span className="text-on-surface">Blockchain Bridge</span>
+                </div>
+                <span className="text-tertiary font-bold animate-pulse">SYNCING (2m behind)</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bento-card flex-1 flex flex-col">
+            <div className="flex justify-between items-end border-b border-outline-variant pb-2 mb-4">
+              <h2 className="text-[20px] leading-[1.4] font-semibold text-on-surface" style={{ fontFamily: "Inter" }}>
+                Market Breakdown
+              </h2>
+              <span className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant" style={{ fontFamily: "JetBrains Mono" }}>
+                BY CATEGORY
+              </span>
+            </div>
+            <div className="flex flex-col gap-3">
+              {["Crypto", "Politics", "Economics", "Sports", "Science"].map((cat) => {
+                const count = markets.filter((m: Market) => m.category === cat).length;
+                const pct = markets.length > 0 ? Math.round((count / markets.length) * 100) : 0;
+                return (
+                  <div key={cat} className="flex flex-col gap-1.5">
+                    <div className="flex justify-between text-[12px]" style={{ fontFamily: "JetBrains Mono" }}>
+                      <span className="text-on-surface-variant font-medium">{cat}</span>
+                      <span className="text-on-surface font-bold">{count} <span className="text-on-surface-variant font-normal">({pct}%)</span></span>
+                    </div>
+                    <div className="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+                      <div className="bg-primary h-full rounded-full transition-all" style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-auto pt-4 border-t border-outline-variant">
+              <span className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant" style={{ fontFamily: "JetBrains Mono" }}>
+                TOTAL MARKETS: <span className="text-on-surface font-bold">{markets.length}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

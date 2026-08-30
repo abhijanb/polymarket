@@ -1,4 +1,4 @@
-import { prisma } from "../../lib/prisma";
+import { prisma } from "../../../lib/prisma";
 import { comparePassword, hashPassword } from "abhijanb";
 
 export async function validateUser(email: string, plainPassword: string) {

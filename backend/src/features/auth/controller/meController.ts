@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import { verifyAccessToken } from "../../utils/jwt";
-import { prisma } from "../../lib/prisma";
+import { verifyAccessToken } from "../../../utils/jwt";
+import { prisma } from "../../../lib/prisma";
 
 export async function meController(req: Request, res: Response) {
   try {
