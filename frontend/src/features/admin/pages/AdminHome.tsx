@@ -174,50 +174,9 @@ export function AdminHome() {
           </div>
         </div>
 
-        {/* Right Column (4 col span): System Health & Liquidity */}
-        <div className="col-span-4 flex flex-col gap-px bg-[#E2E8F0]">
-          <div className="bento-card h-[250px] flex flex-col">
-            <div className="flex justify-between items-end border-b border-outline-variant pb-2 mb-4">
-              <h2 className="text-[20px] leading-[1.4] font-semibold text-on-surface" style={{ fontFamily: "Inter" }}>
-                System Health
-              </h2>
-              <span className="text-[10px] tracking-[0.05em] font-bold text-secondary flex items-center gap-1" style={{ fontFamily: "JetBrains Mono" }}>
-                <span className="w-2 h-2 rounded-full bg-secondary inline-block animate-pulse" /> ALL SYSTEMS NOMINAL
-              </span>
-            </div>
-            <div className="flex flex-col gap-2.5 text-[14px] font-medium" style={{ fontFamily: "JetBrains Mono" }}>
-              <div className="flex items-center justify-between p-2.5 border border-outline-variant rounded-sm bg-surface hover:bg-surface-container-high transition-colors">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary text-[18px]">bolt</span>
-                  <span className="text-on-surface">Matching Engine</span>
-                </div>
-                <span className="text-secondary font-bold">UP (12ms)</span>
-              </div>
-              <div className="flex items-center justify-between p-2.5 border border-outline-variant rounded-sm bg-surface hover:bg-surface-container-high transition-colors">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary text-[18px]">storage</span>
-                  <span className="text-on-surface">Persistence Layer</span>
-                </div>
-                <span className="text-secondary font-bold">UP (4ms)</span>
-              </div>
-              <div className="flex items-center justify-between p-2.5 border border-outline-variant rounded-sm bg-surface hover:bg-surface-container-high transition-colors">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary text-[18px]">hub</span>
-                  <span className="text-on-surface">Message Broker</span>
-                </div>
-                <span className="text-secondary font-bold">UP</span>
-              </div>
-              <div className="flex items-center justify-between p-2.5 border border-tertiary-container rounded-sm bg-surface-container-highest hover:bg-surface-container-high transition-colors">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-tertiary text-[18px] animate-pulse">sync</span>
-                  <span className="text-on-surface">Blockchain Bridge</span>
-                </div>
-                <span className="text-tertiary font-bold animate-pulse">SYNCING (2m behind)</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bento-card flex-1 flex flex-col">
+        {/* Right Column: Market Breakdown */}
+        <div className="col-span-12">
+          <div className="bento-card flex flex-col">
             <div className="flex justify-between items-end border-b border-outline-variant pb-2 mb-4">
               <h2 className="text-[20px] leading-[1.4] font-semibold text-on-surface" style={{ fontFamily: "Inter" }}>
                 Market Breakdown

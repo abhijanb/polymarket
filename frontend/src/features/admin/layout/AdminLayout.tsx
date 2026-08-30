@@ -70,10 +70,6 @@ export function AdminLayout() {
             <span className="text-[14px] font-medium">Users</span>
           </NavLink>
           <a className="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors active:opacity-80" href="#" onClick={(e) => e.preventDefault()} style={{ fontFamily: "JetBrains Mono" }}>
-            <span className="material-symbols-outlined text-[20px]">monitor_heart</span>
-            <span className="text-[14px] font-medium">System Health</span>
-          </a>
-          <a className="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors active:opacity-80" href="#" onClick={(e) => e.preventDefault()} style={{ fontFamily: "JetBrains Mono" }}>
             <span className="material-symbols-outlined text-[20px]">settings</span>
             <span className="text-[14px] font-medium">Settings</span>
           </a>
