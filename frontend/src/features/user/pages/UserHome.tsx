@@ -3,7 +3,7 @@ import { useLogout } from "@/features/auth/hooks/useLogout";
 import { cn, formatCurrency, formatNumber } from "@/shared/lib/utils";
 import { useGetDashboardMarketsQuery, useGetPortfolioSummaryQuery } from "@/features/user/api/dashboardApi";
 import { transformMarketToDashboard, type MarketDashboard } from "@/features/user/model/dashboardTypes";
-import { categories, featuredMarket as fallbackFeatured, portfolioSummary as fallbackPortfolio } from "@/features/user/model/dashboardData";
+import { featuredMarket as fallbackFeatured, portfolioSummary as fallbackPortfolio } from "@/features/user/model/dashboardData";
 import { useDashboardFilters, type SortKey } from "@/features/user/hooks/useDashboardFilters";
 
 export function UserHome() {
@@ -36,16 +36,9 @@ export function UserHome() {
       : fallbackFeatured;
 
   const sidebarNav = [
-    { name: "All", icon: "dashboard" },
     { name: "Trending", icon: "invoices" },
-    { name: "Politics", icon: "ballot" },
-    { name: "Crypto", icon: "currency_bitcoin" },
-    { name: "Sports", icon: "sports_soccer" },
-    { name: "Economics", icon: "trending_up" },
-    { name: "Science", icon: "science" },
   ];
 
-  const categoryPills = ["All", ...categories.map((c) => c.name)];
   const topNavLinks = ["Politics", "Crypto", "Sports"];
 
   return (
@@ -294,44 +287,6 @@ export function UserHome() {
                 </div>
               </>
             )}
-          </div>
-        </section>
-
-        {/* Categories Grid */}
-        <section className="grid grid-cols-5 gap-4 mb-6">
-          {categories.map((cat) => (
-            <div
-              key={cat.name}
-              className="pane flex flex-col items-center gap-2 text-center hover:shadow-sm transition-shadow cursor-pointer"
-            >
-              <div className={cn("w-12 h-12 rounded-full flex items-center justify-center text-[22px]", cat.colorClass)}>
-                <span className="material-symbols-outlined">{cat.icon}</span>
-              </div>
-              <span className="text-[14px] font-medium text-on-surface" style={{ fontFamily: "Inter" }}>
-                {cat.name}
-              </span>
-            </div>
-          ))}
-        </section>
-
-        {/* Category Filter Pills */}
-        <section className="mb-6">
-          <div className="flex gap-2 flex-wrap">
-            {categoryPills.map((pill) => (
-              <button
-                key={pill}
-                onClick={() => setActiveCategory(pill)}
-                className={cn(
-                  "px-4 py-1.5 rounded-sm text-[13px] font-medium transition-all",
-                  activeCategory === pill
-                    ? "bg-primary text-on-primary"
-                    : "bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
-                )}
-                style={{ fontFamily: "Inter" }}
-              >
-                {pill}
-              </button>
-            ))}
           </div>
         </section>
 
