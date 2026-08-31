@@ -22,8 +22,6 @@ export function UserHome() {
   const {
     searchTerm,
     setSearchTerm,
-    activeCategory,
-    setActiveCategory,
     sortBy,
     sortDir,
     handleSort,
@@ -34,10 +32,6 @@ export function UserHome() {
     markets.length > 0
       ? markets.reduce((max, m) => (m.volume24h > max.volume24h ? m : max))
       : fallbackFeatured;
-
-  const sidebarNav = [
-    { name: "Trending", icon: "invoices" },
-  ];
 
   const topNavLinks = ["Politics", "Crypto", "Sports"];
 
@@ -105,25 +99,6 @@ export function UserHome() {
           <p className="text-[12px] text-on-surface-variant" style={{ fontFamily: "JetBrains Mono" }}>
             Institutional Grade
           </p>
-        </div>
-        <div className="flex-1 p-2">
-          {sidebarNav.map((item) => (
-            <a
-              key={item.name}
-              href="#"
-              onClick={() => setActiveCategory(item.name)}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-sm text-[14px] font-medium transition-colors cursor-pointer",
-                activeCategory === item.name
-                  ? "bg-surface-container-highest text-primary border-l-2 border-primary"
-                  : "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"
-              )}
-              style={{ fontFamily: "JetBrains Mono" }}
-            >
-              <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
-              {item.name}
-            </a>
-          ))}
         </div>
         <div className="border-t border-outline-variant p-4 space-y-2">
           <button
