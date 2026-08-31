@@ -4,16 +4,31 @@ import { cn, formatCurrency, formatNumber } from "@/shared/lib/utils";
 import { useGetDashboardMarketsQuery, useGetPortfolioSummaryQuery } from "@/features/user/api/dashboardApi";
 import { transformMarketToDashboard, type MarketDashboard } from "@/features/user/model/dashboardTypes";
 import { categories, featuredMarket as fallbackFeatured, portfolioSummary as fallbackPortfolio } from "@/features/user/model/dashboardData";
+import { useDashboardFilters, type SortKey } from "@/features/user/hooks/useDashboardFilters";
 
 export function UserHome() {
   const user = useAppSelector((s) => s.auth.user);
   const { handleLogout } = useLogout();
 
-  const { data: marketsData, isLoading: marketsLoading } = useGetDashboardMarketsQuery();
+  const { data: marketsData, isLoading: marketsLoading } = useGetDashboardMarketsQuery(undefined, {
+    pollingInterval: 30000,
+    skip: false,
+  });
   const { data: portfolioData, isLoading: portfolioLoading } = useGetPortfolioSummaryQuery();
 
   const markets: MarketDashboard[] = marketsData?.map(transformMarketToDashboard) ?? [];
   const portfolio = portfolioData ?? fallbackPortfolio;
+
+  const {
+    searchTerm,
+    setSearchTerm,
+    activeCategory,
+    setActiveCategory,
+    sortBy,
+    sortDir,
+    handleSort,
+    processedMarkets,
+  } = useDashboardFilters({ markets });
 
   const featuredMarket =
     markets.length > 0
@@ -21,14 +36,16 @@ export function UserHome() {
       : fallbackFeatured;
 
   const sidebarNav = [
-    { name: "Trending", icon: "invoices", active: true },
-    { name: "Politics", icon: "ballot", active: false },
-    { name: "Crypto", icon: "currency_bitcoin", active: false },
-    { name: "Sports", icon: "sports_soccer", active: false },
-    { name: "Economics", icon: "trending_up", active: false },
-    { name: "Science", icon: "science", active: false },
+    { name: "All", icon: "dashboard" },
+    { name: "Trending", icon: "invoices" },
+    { name: "Politics", icon: "ballot" },
+    { name: "Crypto", icon: "currency_bitcoin" },
+    { name: "Sports", icon: "sports_soccer" },
+    { name: "Economics", icon: "trending_up" },
+    { name: "Science", icon: "science" },
   ];
 
+  const categoryPills = ["All", ...categories.map((c) => c.name)];
   const topNavLinks = ["Politics", "Crypto", "Sports"];
 
   return (
@@ -45,6 +62,8 @@ export function UserHome() {
             <input
               type="text"
               placeholder="Search markets..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-[240px] pl-10 pr-4 py-2 bg-surface-container-high rounded-sm text-[14px] text-on-surface placeholder-text-slate focus:outline-none focus:ring-1 focus:ring-primary"
               style={{ fontFamily: "Inter" }}
             />
@@ -99,9 +118,10 @@ export function UserHome() {
             <a
               key={item.name}
               href="#"
+              onClick={() => setActiveCategory(item.name)}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-sm text-[14px] font-medium transition-colors",
-                item.active
+                "flex items-center gap-3 px-4 py-3 rounded-sm text-[14px] font-medium transition-colors cursor-pointer",
+                activeCategory === item.name
                   ? "bg-surface-container-highest text-primary border-l-2 border-primary"
                   : "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"
               )}
@@ -310,6 +330,27 @@ export function UserHome() {
           ))}
         </section>
 
+        {/* Category Filter Pills */}
+        <section className="mb-6">
+          <div className="flex gap-2 flex-wrap">
+            {categoryPills.map((pill) => (
+              <button
+                key={pill}
+                onClick={() => setActiveCategory(pill)}
+                className={cn(
+                  "px-4 py-1.5 rounded-sm text-[13px] font-medium transition-all",
+                  activeCategory === pill
+                    ? "bg-primary text-on-primary"
+                    : "bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
+                )}
+                style={{ fontFamily: "Inter" }}
+              >
+                {pill}
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* Active Markets Table */}
         <section className="pane">
           <div className="flex justify-between items-end border-b border-outline-variant pb-2 mb-4">
@@ -329,9 +370,9 @@ export function UserHome() {
                 <div key={i} className="h-14 bg-surface-container-high rounded-sm" />
               ))}
             </div>
-          ) : markets.length === 0 ? (
+          ) : processedMarkets.length === 0 ? (
             <div className="py-8 text-center text-on-surface-variant" style={{ fontFamily: "Inter" }}>
-              No active markets available. Check back later.
+              No markets match your search or category filter. Try adjusting filters.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -345,16 +386,38 @@ export function UserHome() {
                       MARKET
                     </th>
                     <th
-                      className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2"
+                      onClick={() => handleSort("probability")}
+                      className={cn(
+                        "text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2 cursor-pointer select-none",
+                        "transition-colors hover:text-on-surface"
+                      )}
                       style={{ fontFamily: "JetBrains Mono" }}
                     >
-                      PROBABILITY
+                      <div className="flex items-center gap-1">
+                        PROBABILITY
+                        {sortBy === "probability" && (
+                          <span className="material-symbols-outlined text-[14px]">
+                            {sortDir === "desc" ? "arrow_downward" : "arrow_upward"}
+                          </span>
+                        )}
+                      </div>
                     </th>
                     <th
-                      className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2"
+                      onClick={() => handleSort("volume24h")}
+                      className={cn(
+                        "text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2 cursor-pointer select-none",
+                        "transition-colors hover:text-on-surface"
+                      )}
                       style={{ fontFamily: "JetBrains Mono" }}
                     >
-                      24H VOL
+                      <div className="flex items-center gap-1">
+                        24H VOL
+                        {sortBy === "volume24h" && (
+                          <span className="material-symbols-outlined text-[14px]">
+                            {sortDir === "desc" ? "arrow_downward" : "arrow_upward"}
+                          </span>
+                        )}
+                      </div>
                     </th>
                     <th
                       className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2"
@@ -365,8 +428,8 @@ export function UserHome() {
                   </tr>
                 </thead>
                 <tbody className="text-[14px]" style={{ fontFamily: "Inter" }}>
-                  {markets.map((market) => (
-                    <tr key={market.id} className="data-table-row">
+                  {processedMarkets.map((market) => (
+                    <tr key={market.id} className="data-table-row transition-colors duration-200">
                       <td className="py-3">
                         <div className="flex flex-col">
                           <span className="font-medium text-on-surface">{market.title}</span>
@@ -379,7 +442,7 @@ export function UserHome() {
                         <div className="flex flex-col">
                           <span className="font-bold text-on-surface">{market.probability}%</span>
                           <div className="w-20 h-1.5 bg-surface-container-highest rounded-full overflow-hidden mt-1.5">
-                            <div className="bg-primary h-full rounded-full" style={{ width: `${market.probability}%` }} />
+                            <div className="bg-primary h-full rounded-full transition-all duration-300" style={{ width: `${market.probability}%` }} />
                           </div>
                         </div>
                       </td>

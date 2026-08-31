@@ -175,3 +175,9 @@
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+
+.probability-loading {
+  background: linear-gradient(90deg, var(--color-outline-variant) 0%, var(--color-surface-container-highest) 50%, var(--color-outline-variant) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
