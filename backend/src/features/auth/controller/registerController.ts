@@ -2,17 +2,9 @@ import type { Request, Response } from "express";
 import { registerSchema } from "../validation/auth.schema";
 import { createUser } from "../service/auth.service";
 import { signAccessToken } from "../../../utils/jwt";
-import { validate } from "../../../utils/validate";
 
 export async function registerController(req: Request, res: Response) {
-  const result = validate(registerSchema, req.body) 
-  if (!result.success) {
-    throw Object.assign(new Error("Validation failed"), {
-      status: 400,
-      errors: result.errors,
-    });
-  }
-  const { email, password, name } = result.data
+  const { email, password, name } = req.body;
 
   const user = await createUser({ email, password, name });
 

@@ -1,60 +1,58 @@
-import { useState } from "react";
+import { useForm, type UseFormReturn } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { useCreateMarketMutation } from "../api/marketApi";
 import { extractFieldErrors, toApiDatetime } from "@/shared/api/errors";
+import { createMarketSchema, type CreateMarketInput } from "../lib/schemas";
 
 export function useCreateMarket() {
   const navigate = useNavigate();
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("Crypto");
-  const [resolutionDate, setResolutionDate] = useState("");
-  const [oracleUrl, setOracleUrl] = useState("");
-  const [description, setDescription] = useState("");
-
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
   const [createMarket, { isLoading, error }] = useCreateMarketMutation();
 
-  const handleLaunch = async () => {
-    setFieldErrors({});
+  const form = useForm<CreateMarketInput>({
+    resolver: zodResolver(createMarketSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      category: "Crypto",
+      resolutionDate: "",
+      oracleUrl: "",
+    },
+  });
+
+  const doSubmit = async (data: CreateMarketInput, label: string) => {
     try {
       await createMarket({
-        title,
-        description,
-        category,
-        resolutionDate: toApiDatetime(resolutionDate),
-        oracleUrl,
+        ...data,
+        resolutionDate: toApiDatetime(data.resolutionDate),
       }).unwrap();
       navigate("/admin/markets");
     } catch (err) {
-      setFieldErrors(extractFieldErrors(err));
-      console.error("[handleLaunch]", err);
+      const fieldErrors = extractFieldErrors(err);
+      if (Object.keys(fieldErrors).length > 0) {
+        for (const [field, message] of Object.entries(fieldErrors)) {
+          form.setError(field as keyof CreateMarketInput, { type: "server", message });
+        }
+      } else {
+        console.error(label, err);
+      }
     }
   };
 
-  const handleSaveDraft = async () => {
-    setFieldErrors({});
-    try {
-      await createMarket({
-        title,
-        description,
-        category,
-        resolutionDate: toApiDatetime(resolutionDate),
-        oracleUrl,
-      }).unwrap();
-      navigate("/admin/markets");
-    } catch (err) {
-      setFieldErrors(extractFieldErrors(err));
-      console.error("[handleSaveDraft]", err);
-    }
-  };
+  const handleLaunch = form.handleSubmit((data) => doSubmit(data, "[handleLaunch]"));
+  const handleSaveDraft = form.handleSubmit((data) => doSubmit(data, "[handleSaveDraft]"));
+
+  const watchedFields = form.watch();
 
   return {
-    title, setTitle,
-    category, setCategory,
-    resolutionDate, setResolutionDate,
-    oracleUrl, setOracleUrl,
-    description, setDescription,
-    handleLaunch, handleSaveDraft, isLoading, error, fieldErrors,
+    form,
+    handleLaunch,
+    handleSaveDraft,
+    saving: isLoading,
+    isLoading,
+    error,
+    title: watchedFields.title,
+    category: watchedFields.category,
+    resolutionDate: watchedFields.resolutionDate,
   };
 }

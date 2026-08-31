@@ -1,5 +1,6 @@
 import { baseApi } from "@/shared/api/baseApi";
-import type { CreateMarketInput, Market, UpdateMarketInput } from "@/shared/types/market";
+import type { CreateMarketInput } from "@/features/admin/market/lib/schemas";
+import type { Market, UpdateMarketInput } from "@/shared/types/market";
 
 export const marketApi = baseApi.injectEndpoints({
   endpoints: (build) => ({

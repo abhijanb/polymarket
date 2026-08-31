@@ -1,41 +1,19 @@
+import type { UseFormReturn } from "react-hook-form";
+import type { CreateMarketInput } from "../../lib/schemas";
+
 type Props = {
-  title: string;
-  setTitle: (v: string) => void;
-  category: string;
-  setCategory: (v: string) => void;
-  resolutionDate: string;
-  setResolutionDate: (v: string) => void;
-  oracleUrl: string;
-  setOracleUrl: (v: string) => void;
-  description: string;
-  setDescription: (v: string) => void;
+  form: UseFormReturn<CreateMarketInput>;
   onLaunch: () => void;
   onSaveDraft: () => void;
   isLoading: boolean;
   error: unknown;
-  fieldErrors?: Record<string, string>;
 };
 
 const fieldErrorClass = "text-red-400 text-[12px] font-medium";
-const errorBorderClass = "border-red-400 focus:border-red-400 focus:ring-red-400";
 
-export function CreateMarketForm({
-  title,
-  setTitle,
-  category,
-  setCategory,
-  resolutionDate,
-  setResolutionDate,
-  oracleUrl,
-  setOracleUrl,
-  description,
-  setDescription,
-  onLaunch,
-  onSaveDraft,
-  isLoading,
-  error,
-  fieldErrors = {},
-}: Props) {
+export function CreateMarketForm({ form, onLaunch, onSaveDraft, isLoading, error }: Props) {
+  const { register, formState: { errors } } = form;
+
   return (
     <div className="flex-1 bg-surface-container-low border border-outline-variant rounded-lg p-4 flex flex-col space-y-3">
       <div className="border-b border-surface-variant pb-1 mb-3">
@@ -44,20 +22,19 @@ export function CreateMarketForm({
         </h1>
       </div>
 
-      <form className="flex-1 min-h-0 space-y-3 overflow-y-auto pr-1" style={{ scrollbarWidth: "thin" }} onSubmit={(e) => { e.preventDefault(); onLaunch(); }}>
+      <form onSubmit={onLaunch} className="flex-1 min-h-0 space-y-3 overflow-y-auto pr-1" style={{ scrollbarWidth: "thin" }}>
         <div>
           <label className="block text-[10px] tracking-[0.05em] font-bold text-on-surface-variant mb-1" style={{ fontFamily: "JetBrains Mono" }}>
             MARKET QUESTION / TITLE
           </label>
           <input
-            className={`w-full bg-surface-container-high border border-outline-variant rounded-sm px-2 py-1.5 text-[14px] font-medium text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors ${fieldErrors.title ? errorBorderClass : ""}`}
+            {...register("title")}
+            className={`w-full bg-surface-container-high border border-outline-variant rounded-sm px-2 py-1.5 text-[14px] font-medium text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors ${errors.title ? "border-red-400 focus:border-red-400 focus:ring-red-400" : ""}`}
             style={{ fontFamily: "JetBrains Mono" }}
             placeholder="e.g., Will Bitcoin hit $100k by EOY?"
             type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
           />
-          {fieldErrors.title && <span className={fieldErrorClass}>{fieldErrors.title}</span>}
+          {errors.title && <span className={fieldErrorClass}>{errors.title.message}</span>}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -66,10 +43,9 @@ export function CreateMarketForm({
               CATEGORY
             </label>
             <select
+              {...register("category")}
               className="w-full bg-surface-container-high border border-outline-variant rounded-sm px-2 py-1.5 text-[14px] font-medium text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none"
               style={{ fontFamily: "JetBrains Mono" }}
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
             >
               <option>Crypto</option>
               <option>Politics</option>
@@ -77,19 +53,19 @@ export function CreateMarketForm({
               <option>Sports</option>
               <option>Science</option>
             </select>
+            {errors.category && <span className={fieldErrorClass}>{errors.category.message}</span>}
           </div>
           <div>
             <label className="block text-[10px] tracking-[0.05em] font-bold text-on-surface-variant mb-1" style={{ fontFamily: "JetBrains Mono" }}>
               RESOLUTION DATE (UTC)
             </label>
-          <input
-            className={`w-full bg-surface-container-high border border-outline-variant rounded-sm px-2 py-1.5 text-[14px] font-medium text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none ${fieldErrors.resolutionDate ? errorBorderClass : ""}`}
-            style={{ fontFamily: "JetBrains Mono" }}
-            type="datetime-local"
-            value={resolutionDate}
-            onChange={(e) => setResolutionDate(e.target.value)}
-          />
-            {fieldErrors.resolutionDate && <span className={fieldErrorClass}>{fieldErrors.resolutionDate}</span>}
+            <input
+              {...register("resolutionDate")}
+              className={`w-full bg-surface-container-high border border-outline-variant rounded-sm px-2 py-1.5 text-[14px] font-medium text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none ${errors.resolutionDate ? "border-red-400 focus:border-red-400 focus:ring-red-400" : ""}`}
+              style={{ fontFamily: "JetBrains Mono" }}
+              type="datetime-local"
+            />
+            {errors.resolutionDate && <span className={fieldErrorClass}>{errors.resolutionDate.message}</span>}
           </div>
         </div>
 
@@ -102,15 +78,14 @@ export function CreateMarketForm({
               URL
             </span>
             <input
-              className={`flex-1 bg-surface-container-high border border-outline-variant rounded-r-sm px-2 py-1.5 text-[14px] font-medium text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none ${fieldErrors.oracleUrl ? errorBorderClass : ""}`}
+              {...register("oracleUrl")}
+              className={`flex-1 bg-surface-container-high border border-outline-variant rounded-r-sm px-2 py-1.5 text-[14px] font-medium text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none ${errors.oracleUrl ? "border-red-400 focus:border-red-400 focus:ring-red-400" : ""}`}
               style={{ fontFamily: "JetBrains Mono" }}
               placeholder="https://api.coingecko.com/..."
               type="url"
-              value={oracleUrl}
-              onChange={(e) => setOracleUrl(e.target.value)}
             />
           </div>
-          {fieldErrors.oracleUrl && <span className={fieldErrorClass}>{fieldErrors.oracleUrl}</span>}
+          {errors.oracleUrl && <span className={fieldErrorClass}>{errors.oracleUrl.message}</span>}
         </div>
 
         <div>
@@ -118,19 +93,18 @@ export function CreateMarketForm({
             MARKET RULES & DESCRIPTION
           </label>
           <textarea
-            className={`w-full bg-surface-container-high border border-outline-variant rounded-sm px-2 py-1.5 text-[12px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none ${fieldErrors.description ? errorBorderClass : ""}`}
+            {...register("description")}
+            className={`w-full bg-surface-container-high border border-outline-variant rounded-sm px-2 py-1.5 text-[12px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none ${errors.description ? "border-red-400 focus:border-red-400 focus:ring-red-400" : ""}`}
             style={{ fontFamily: "JetBrains Mono" }}
             placeholder="Define the exact parameters for YES and NO resolution..."
             rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
           />
-          {fieldErrors.description && <span className={fieldErrorClass}>{fieldErrors.description}</span>}
+          {errors.description && <span className={fieldErrorClass}>{errors.description.message}</span>}
         </div>
       </form>
 
       <div className="min-h-[2.25rem]">
-        {Boolean(error) && Object.keys(fieldErrors).length === 0 && (
+        {Boolean(error) && Object.keys(errors).length === 0 && (
           <div className="text-red-400 text-[13px] font-medium bg-red-400/10 rounded-sm px-3 py-2" style={{ fontFamily: "JetBrains Mono" }}>
             {error instanceof Error ? error.message : "Something went wrong. Please check the console for details."}
           </div>
@@ -148,7 +122,7 @@ export function CreateMarketForm({
           {isLoading ? "Saving..." : "Save Draft"}
         </button>
         <button
-          type="button"
+          type="submit"
           onClick={onLaunch}
           disabled={isLoading}
           className="px-4 py-2 bg-primary text-on-primary text-[14px] font-medium rounded-sm hover:bg-primary-fixed-dim transition-colors font-bold disabled:opacity-50"
