@@ -24,6 +24,14 @@
   src: url("/fonts/material-symbols-outlined.woff2") format("woff2");
 }
 
+@font-face {
+  font-family: "Hanken Grotesk";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/hanken-grotesk-latin.woff2") format("woff2");
+}
+
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-weight: normal;
@@ -42,53 +50,80 @@
 }
 
 @theme {
-  --color-on-primary-fixed-variant: #004395;
-  --color-tertiary-container: #ff5451;
-  --color-outline: #94a3b8;
-  --color-tertiary-fixed: #ffdad7;
-  --color-secondary-container: #00b954;
-  --color-on-tertiary: #ffffff;
-  --color-inverse-primary: #005ac2;
-  --color-surface-container-highest: #e2e8f0;
-  --color-surface-container-low: #f8fafc;
-  --color-secondary-fixed: #6bff8f;
-  --color-surface-bright: #ffffff;
-  --color-on-secondary-fixed: #002109;
-  --color-on-secondary: #ffffff;
-  --color-surface-container-high: #f1f5f9;
-  --color-secondary-fixed-dim: #4ae176;
-  --color-on-error-container: #ffdad6;
-  --color-on-tertiary-container: #5c0008;
-  --color-on-surface: #0f172a;
-  --color-surface: #ffffff;
-  --color-primary-fixed-dim: #adc6ff;
-  --color-on-tertiary-fixed-variant: #930013;
-  --color-secondary: #00b954;
-  --color-on-secondary-fixed-variant: #005321;
-  --color-inverse-surface: #0f172a;
-  --color-tertiary-fixed-dim: #ffb3ad;
-  --color-on-primary: #ffffff;
-  --color-on-background: #0f172a;
-  --color-primary-fixed: #d8e2ff;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-dim: #f8fafc;
-  --color-surface-tint: #005ac2;
-  --color-on-primary-fixed: #001a42;
-  --color-surface-container: #f1f5f9;
-  --color-background: #f8fafc;
-  --color-on-error: #ffffff;
-  --color-outline-variant: #cbd5e1;
-  --color-on-secondary-container: #004119;
-  --color-primary-container: #d8e2ff;
+  --font-headline-xl: "Hanken Grotesk";
+  --font-headline-lg: "Hanken Grotesk";
+  --font-headline-lg-mobile: "Hanken Grotesk";
+  --font-data-display: "JetBrains Mono";
+  --font-mono-label: "JetBrains Mono";
+  --font-body-sm: "Inter";
+  --font-body-md: "Inter";
+
+  --text-headline-xl: 40px;
+  --text-headline-lg: 32px;
+  --text-headline-lg-mobile: 24px;
+  --text-data-display: 14px;
+  --text-mono-label: 12px;
+  --text-body-sm: 14px;
+  --text-body-md: 16px;
+
   --color-primary: #005ac2;
-  --color-on-tertiary-fixed: #410004;
-  --color-inverse-on-surface: #f8fafc;
-  --color-tertiary: #ff5451;
-  --color-error-container: #ffdad6;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #0058be;
+  --color-on-primary-container: #c4d5ff;
+  --color-primary-fixed: #d8e2ff;
+  --color-on-primary-fixed: #001a42;
+  --color-primary-fixed-dim: #adc6ff;
+  --color-on-primary-fixed-variant: #004395;
+  --color-inverse-primary: #005ac2;
+
+  --color-secondary: #545f73;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #d5e0f8;
+  --color-on-secondary-container: #586377;
+  --color-secondary-fixed: #d8e3fb;
+  --color-on-secondary-fixed: #111c2d;
+  --color-on-secondary-fixed-variant: #3c475a;
+  --color-secondary-fixed-dim: #bcc7de;
+
+  --color-tertiary: #3d4559;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #545c72;
+  --color-on-tertiary-container: #cdd5ef;
+  --color-tertiary-fixed: #dae2fc;
+  --color-on-tertiary-fixed: #131b2e;
+  --color-on-tertiary-fixed-variant: #3e465b;
+  --color-tertiary-fixed-dim: #bec6e0;
+
+  --color-surface: #ffffff;
+  --color-on-surface: #0f172a;
   --color-on-surface-variant: #475569;
   --color-surface-variant: #e2e8f0;
-  --color-on-primary-container: #00285d;
+  --color-outline: #94a3b8;
+  --color-outline-variant: #cbd5e1;
+  --color-surface-container: #f1f5f9;
+  --color-surface-container-low: #f8fafc;
+  --color-surface-container-high: #f1f5f9;
+  --color-surface-container-highest: #e2e8f0;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-bright: #ffffff;
+  --color-surface-dim: #f8fafc;
+  --color-surface-tint: #005ac2;
+  --color-inverse-surface: #0f172a;
+  --color-inverse-on-surface: #f8fafc;
+
+  --color-background: #f8fafc;
+  --color-on-background: #0f172a;
+
   --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #ffdad6;
+
+  --color-surface-canvas: #f7f9fb;
+  --color-border-subtle: #e2e8f0;
+  --color-text-slate: #424754;
+  --color-text-charcoal: #191c1e;
+  --color-terminal-accent: #005ac2;
 }
 
 @layer base {
@@ -110,6 +145,16 @@
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* Light-only bento helpers from PredictX Dashboard */
+.pane {
+  background-color: #ffffff;
+  padding: 16px;
+  border: 1px solid var(--color-outline-variant);
+}
+.pane-lg {
+  background-color: #ffffff;
+  padding: 20px;
+  border: 1px solid var(--color-outline-variant);
+}
 .terminal-bento {
   display: grid;
   gap: 1px;
