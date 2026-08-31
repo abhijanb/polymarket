@@ -87,11 +87,7 @@ export function UserHome() {
           <button className="px-4 py-2 bg-primary text-on-primary text-[14px] font-bold rounded-sm hover:opacity-90 active:opacity-80 transition-all uppercase tracking-wider">
             Connect Wallet
           </button>
-          <button className="hidden md:flex items-center gap-2 px-4 py-2 bg-surface-container border border-outline-variant text-on-surface text-[14px] font-bold rounded-sm hover:bg-surface-container-low transition-all">
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            CREATE MARKET
-          </button>
-           <button className="md:hidden p-2 rounded-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+          <button className="md:hidden p-2 rounded-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
             <span className="material-symbols-outlined">menu</span>
           </button>
           <div ref={profileRef} className="relative">
