@@ -7,8 +7,8 @@ import { deleteMarketData } from "./controllers/deleteMarketData";
 import { authMiddleware } from "../../middlewares/auth";
 
 export const marketRouter = express.Router();
-marketRouter.get("/market", getMarketData);
-marketRouter.get("/market/:id", getMarketDataById);
-marketRouter.post("/market", authMiddleware, storeMarketData);
-marketRouter.put("/market/:id", authMiddleware, updateMarketData);
-marketRouter.delete("/market/:id", authMiddleware, deleteMarketData);
+marketRouter.get("/", getMarketData);
+marketRouter.get("/:id", getMarketDataById);
+marketRouter.post("/", authMiddleware, storeMarketData);
+marketRouter.put("/:id", authMiddleware, updateMarketData);
+marketRouter.delete("/:id", authMiddleware, deleteMarketData);

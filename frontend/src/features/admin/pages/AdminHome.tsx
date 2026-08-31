@@ -175,7 +175,7 @@ export function AdminHome() {
         </div>
 
         {/* Right Column: Market Breakdown */}
-        <div className="col-span-12">
+        <div className="col-span-4">
           <div className="bento-card flex flex-col">
             <div className="flex justify-between items-end border-b border-outline-variant pb-2 mb-4">
               <h2 className="text-[20px] leading-[1.4] font-semibold text-on-surface" style={{ fontFamily: "Inter" }}>

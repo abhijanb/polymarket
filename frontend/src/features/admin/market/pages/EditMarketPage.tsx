@@ -9,7 +9,7 @@ export function EditMarketPage() {
   if (!market) return <div className="p-4 text-red-400">Market not found</div>;
 
   return (
-    <div className="max-w-4xl mx-auto flex flex-col gap-6">
+    <div className="max-w-4xl mx-auto flex flex-col gap-6 h-full min-h-0">
       <div className="flex justify-between items-center">
         <div>
           <Link to={`/admin/markets/${market.id}`} className="text-primary text-[12px] hover:underline mb-2 block" style={{ fontFamily: "JetBrains Mono" }}>

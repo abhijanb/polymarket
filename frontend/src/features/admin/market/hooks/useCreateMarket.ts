@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateMarketMutation } from "../api/marketApi";
+import { extractFieldErrors, toApiDatetime } from "@/shared/api/errors";
 
 export function useCreateMarket() {
   const navigate = useNavigate();
@@ -10,34 +11,40 @@ export function useCreateMarket() {
   const [oracleUrl, setOracleUrl] = useState("");
   const [description, setDescription] = useState("");
 
-  const [createMarket, { isLoading }] = useCreateMarketMutation();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const [createMarket, { isLoading, error }] = useCreateMarketMutation();
 
   const handleLaunch = async () => {
+    setFieldErrors({});
     try {
       await createMarket({
         title,
         description,
         category,
-        resolutionDate,
+        resolutionDate: toApiDatetime(resolutionDate),
         oracleUrl,
       }).unwrap();
       navigate("/admin/markets");
     } catch (err) {
+      setFieldErrors(extractFieldErrors(err));
       console.error("[handleLaunch]", err);
     }
   };
 
   const handleSaveDraft = async () => {
+    setFieldErrors({});
     try {
       await createMarket({
         title,
         description,
         category,
-        resolutionDate,
+        resolutionDate: toApiDatetime(resolutionDate),
         oracleUrl,
       }).unwrap();
       navigate("/admin/markets");
     } catch (err) {
+      setFieldErrors(extractFieldErrors(err));
       console.error("[handleSaveDraft]", err);
     }
   };
@@ -48,6 +55,6 @@ export function useCreateMarket() {
     resolutionDate, setResolutionDate,
     oracleUrl, setOracleUrl,
     description, setDescription,
-    handleLaunch, handleSaveDraft, isLoading,
+    handleLaunch, handleSaveDraft, isLoading, error, fieldErrors,
   };
 }

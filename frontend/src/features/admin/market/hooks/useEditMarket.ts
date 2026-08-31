@@ -4,6 +4,7 @@ import { useForm, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetMarketByIdQuery, useUpdateMarketMutation } from "../api/marketApi";
 import { updateMarketSchema, type UpdateMarketInput } from "../lib/schemas";
+import { extractFieldErrors, toApiDatetime } from "@/shared/api/errors";
 
 export function useEditMarket() {
   const { id } = useParams<{ id: string }>();
@@ -29,10 +30,23 @@ export function useEditMarket() {
 
   const handleSubmit = async (data: UpdateMarketInput) => {
     try {
-      await updateMarket({ id: id!, data }).unwrap();
+      await updateMarket({
+        id: id!,
+        data: {
+          ...data,
+          resolutionDate: data.resolutionDate ? toApiDatetime(data.resolutionDate) : data.resolutionDate,
+        },
+      }).unwrap();
       navigate(`/admin/markets/${id}`);
     } catch (err) {
-      console.error("[update]", err);
+      const fieldErrors = extractFieldErrors(err);
+      if (Object.keys(fieldErrors).length > 0) {
+        for (const [field, message] of Object.entries(fieldErrors)) {
+          form.setError(field as keyof UpdateMarketInput, { type: "server", message });
+        }
+      } else {
+        console.error("[update]", err);
+      }
     }
   };
 

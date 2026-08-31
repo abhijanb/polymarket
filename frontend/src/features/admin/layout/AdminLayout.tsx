@@ -69,10 +69,6 @@ export function AdminLayout() {
             <span className="material-symbols-outlined text-[20px]">group</span>
             <span className="text-[14px] font-medium">Users</span>
           </NavLink>
-          <a className="flex items-center gap-3 px-6 py-3 text-on-surface-variant hover:bg-surface-container-low transition-colors active:opacity-80" href="#" onClick={(e) => e.preventDefault()} style={{ fontFamily: "JetBrains Mono" }}>
-            <span className="material-symbols-outlined text-[20px]">settings</span>
-            <span className="text-[14px] font-medium">Settings</span>
-          </a>
         </div>
 
         <div className="border-t border-outline-variant mt-auto">
@@ -89,23 +85,13 @@ export function AdminLayout() {
           <span className="text-[20px] font-bold text-on-surface tracking-tight uppercase" style={{ fontFamily: "Inter" }}>
             PREDICTION TERMINAL
           </span>
-          <div className="hidden md:flex h-full items-end gap-6">
-          </div>
         </div>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-4 border-r border-outline-variant pr-6">
             <button className="text-on-surface-variant hover:text-on-surface">
               <span className="material-symbols-outlined">notifications</span>
             </button>
-            <button className="text-on-surface-variant hover:text-on-surface">
-              <span className="material-symbols-outlined">terminal</span>
-            </button>
           </div>
-          <img
-            alt="Admin Avatar"
-            className="w-8 h-8 rounded-full object-cover border border-outline-variant"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJ1ckYFW1PFAY24mafDITlKAxiko-sT4g6TKMioG_T_zNi2AnKcirPJRned3BKSOsA5GaCUCiYB2dTP6Dip4DSq-YuOR9rKBJkWUT2UUyk0ghEQqspRwooAaZ-DQieq8fkG5RzD4uFBWUKse23G-u8LSoIa80ri-nJ1na2eS2_ltsgqmExHNmZYzIkfpWtirn4O5u0LXQK48CwKDw4R6V6l6hQuR5joEJPBLoW-moF0SdXfe9ymC1m"
-          />
         </div>
       </header>
 

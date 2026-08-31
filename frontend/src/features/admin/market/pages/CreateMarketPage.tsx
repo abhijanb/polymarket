@@ -3,7 +3,7 @@ import { CreateMarketForm } from "@/features/admin/market/components/form/Create
 import { useCreateMarket } from "@/features/admin/market/hooks/useCreateMarket";
 
 export function CreateMarketPage() {
-  const { title, setTitle, category, setCategory, resolutionDate, setResolutionDate, oracleUrl, setOracleUrl, description, setDescription, handleLaunch, handleSaveDraft } = useCreateMarket();
+  const { title, setTitle, category, setCategory, resolutionDate, setResolutionDate, oracleUrl, setOracleUrl, description, setDescription, handleLaunch, handleSaveDraft, error, isLoading, fieldErrors } = useCreateMarket();
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-3 h-full">
@@ -20,6 +20,9 @@ export function CreateMarketPage() {
         setDescription={setDescription}
         onLaunch={handleLaunch}
         onSaveDraft={handleSaveDraft}
+        isLoading={isLoading}
+        error={error}
+        fieldErrors={fieldErrors}
       />
       <MarketPreview title={title} category={category} resolutionDate={resolutionDate} />
     </div>
