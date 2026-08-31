@@ -44,8 +44,10 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     // me query
     builder.addMatcher(authApi.endpoints.me.matchFulfilled, (state, { payload }) => {
+      const token = getInitialToken();
+      if (!token) return;
       state.user = payload.user;
-      state.token = getInitialToken();
+      state.token = token;
       state.initialized = true;
       state.error = null;
       try { localStorage.setItem("user", JSON.stringify(payload.user)); } catch {}
