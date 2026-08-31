@@ -11,11 +11,11 @@ export const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { path: "/", element: <Navigate to="/admin" replace /> },
-      userRoute,
       { path: "/login", element: <GuestOnly><Login /></GuestOnly> },
       { path: "/register", element: <GuestOnly><Register /></GuestOnly> },
       { path: "*", element: <Navigate to="/login" replace /> },
     ],
   },
+  userRoute,
   adminRoute,
 ]);

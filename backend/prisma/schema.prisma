@@ -52,6 +52,7 @@ model User {
   name      String?
   password  String
   role      Role     @default(USER)
+  balance   Decimal  @db.Decimal(14, 2) @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -1,8 +1,9 @@
 import express from "express";
-import { getUsersController } from "./controller/getUsers";
+import { getPortfolioController } from "./controller/getPortfolio";
+import { getDashboardMarketsController } from "../dashboard/controllers/getDashboardMarkets";
 import { authMiddleware } from "../../middlewares/auth";
-import { requireAdmin } from "../../middlewares/requireAdmin";
 
 export const userRouter = express.Router();
 
-userRouter.get("/", authMiddleware, requireAdmin, getUsersController);
+userRouter.get("/portfolio", authMiddleware, getPortfolioController);
+userRouter.get("/dashboard/markets", authMiddleware, getDashboardMarketsController);

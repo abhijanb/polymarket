@@ -23,6 +23,14 @@ export async function getMarkets() {
   });
 }
 
+export async function getActiveMarketsWithOutcomes() {
+  return prisma.market.findMany({
+    where: { status: "ACTIVE" },
+    include: { outcomes: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
 export async function getMarketById(id: string) {
   return prisma.market.findUnique({
     where: { id },
