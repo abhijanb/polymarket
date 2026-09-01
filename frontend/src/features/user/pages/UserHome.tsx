@@ -60,7 +60,7 @@ export function UserHome() {
       : fallbackFeatured;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface-canvas font-sans">
+    <div className="h-screen overflow-hidden bg-surface-canvas font-sans">
       <header className="fixed top-0 left-0 right-0 h-16 bg-surface border-b border-outline-variant z-50 flex items-center px-[24px]">
         <div className="flex items-center gap-8 flex-1">
           <span
