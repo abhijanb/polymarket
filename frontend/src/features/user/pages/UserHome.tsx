@@ -6,6 +6,8 @@ import { useGetDashboardMarketsQuery, useGetPortfolioSummaryQuery } from "@/feat
 import { transformMarketToDashboard, type MarketDashboard } from "@/features/user/model/dashboardTypes";
 import { featuredMarket as fallbackFeatured, portfolioSummary as fallbackPortfolio } from "@/features/user/model/dashboardData";
 import { useDashboardFilters, type SortKey } from "@/features/user/hooks/useDashboardFilters";
+import { OrderEntryModal } from "@/features/user/components/OrderEntryModal";
+import type { OrderSide } from "@/features/user/api/ordersApi";
 
 export function UserHome() {
   const user = useAppSelector((s) => s.auth.user);
@@ -13,6 +15,7 @@ export function UserHome() {
 
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+  const [orderModal, setOrderModal] = useState<{ market: MarketDashboard; side: OrderSide } | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -213,12 +216,14 @@ export function UserHome() {
                 </div>
                 <div className="flex gap-3 mt-4">
                   <button
+                    onClick={() => setOrderModal({ market: featuredMarket, side: "YES" })}
                     className="flex-1 bg-primary text-on-primary font-bold py-2.5 rounded-sm hover:opacity-90 active:opacity-80 transition-all"
                     style={{ fontFamily: "Inter" }}
                   >
                     Buy YES
                   </button>
                   <button
+                    onClick={() => setOrderModal({ market: featuredMarket, side: "NO" })}
                     className="flex-1 bg-surface-container border border-outline-variant text-on-surface font-bold py-2.5 rounded-sm hover:bg-surface-container-low transition-all"
                     style={{ fontFamily: "Inter" }}
                   >
@@ -394,12 +399,14 @@ export function UserHome() {
                       <td className="py-3">
                         <div className="flex gap-1.5">
                           <button
+                            onClick={() => setOrderModal({ market, side: "YES" })}
                             className="px-3 py-1 bg-secondary-container text-on-secondary-container text-[12px] font-bold rounded-sm hover:opacity-90 active:opacity-80 transition-all"
                             style={{ fontFamily: "JetBrains Mono" }}
                           >
                             Buy YES
                           </button>
                           <button
+                            onClick={() => setOrderModal({ market, side: "NO" })}
                             className="px-3 py-1 bg-tertiary-container text-on-tertiary-container text-[12px] font-bold rounded-sm hover:opacity-90 active:opacity-80 transition-all"
                             style={{ fontFamily: "JetBrains Mono" }}
                           >
@@ -415,6 +422,15 @@ export function UserHome() {
           )}
         </section>
       </main>
+
+      {orderModal && (
+        <OrderEntryModal
+          market={orderModal.market}
+          side={orderModal.side}
+          open={true}
+          onClose={() => setOrderModal(null)}
+        />
+      )}
     </div>
   );
 }

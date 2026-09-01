@@ -20,6 +20,66 @@ async function main() {
   });
 
   console.log(`Seeded admin: ${admin.email} (${admin.role}) id=${admin.id}`);
+
+  const sampleMarkets = [
+    {
+      title: "Will Bitcoin reach $100,000 by end of 2025?",
+      description:
+        "This market resolves to YES if the Coinbase Bitcoin price index closes at or above $100,000 USD on any business day in December 2025.",
+      category: "Crypto" as const,
+      resolutionDate: new Date("2025-12-31T23:59:59Z"),
+      oracleUrl: "https://api.coinbase.com/v2/prices/BTC-USD/spot",
+    },
+    {
+      title: "Will Ethereum Spot ETF be approved by May 2025?",
+      description:
+        "This market resolves to YES if the U.S. SEC approves at least one spot Ethereum ETF by May 31, 2025.",
+      category: "Crypto" as const,
+      resolutionDate: new Date("2025-05-31T23:59:59Z"),
+      oracleUrl: "https://www.sec.gov",
+    },
+    {
+      title: "Will Donald Trump win the 2024 U.S. Presidential Election?",
+      description:
+        "This market resolves to YES if Donald Trump wins the majority of electoral votes in the 2024 election.",
+      category: "Politics" as const,
+      resolutionDate: new Date("2024-11-05T23:59:59Z"),
+      oracleUrl: "https://www.fec.gov",
+    },
+    {
+      title: "Will the Fed cut interest rates in June 2025?",
+      description:
+        "This market resolves to YES if the Federal Reserve lowers the target range for the federal funds rate at any FOMC meeting between June 1 and June 30, 2025.",
+      category: "Economics" as const,
+      resolutionDate: new Date("2025-06-30T23:59:59Z"),
+      oracleUrl: "https://www.federalreserve.gov",
+    },
+  ];
+
+  let created = 0;
+  for (const m of sampleMarkets) {
+    const existing = await prisma.market.findFirst({ where: { title: m.title } });
+    if (existing) {
+      console.log(`Market already exists: ${m.title}`);
+      continue;
+    }
+    const market = await prisma.market.create({
+      data: {
+        ...m,
+        status: "ACTIVE",
+        creatorId: admin.id,
+        outcomes: {
+          create: [
+            { label: "YES", probability: 0.5 },
+            { label: "NO", probability: 0.5 },
+          ],
+        },
+      },
+    });
+    created++;
+    console.log(`Seeded market: ${market.title} (id=${market.id})`);
+  }
+  console.log(`Seeded ${created} new market(s)`);
 }
 
 main()
