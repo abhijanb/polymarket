@@ -4,8 +4,8 @@ import { placeOrder, OrderError } from "../service/order.service";
 export async function placeOrderController(req: Request, res: Response) {
   try {
     const userId = req.user!.userId;
-    const { marketId, side, amountUsd } = req.body;
-    const result = await placeOrder({ userId, marketId, side, amountUsd });
+    const { marketId, side, shares, pricePerShareCents } = req.body;
+    const result = await placeOrder({ userId, marketId, side, shares, pricePerShareCents });
     res.status(201).json({ success: true, ...result });
   } catch (error) {
     if (error instanceof OrderError) {

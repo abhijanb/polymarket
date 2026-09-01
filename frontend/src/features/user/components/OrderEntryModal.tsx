@@ -12,13 +12,17 @@ interface OrderEntryModalProps {
 }
 
 export function OrderEntryModal({ market, side, open, onClose }: OrderEntryModalProps) {
-  const [amountUsd, setAmountUsd] = useState<string>("5");
+  const marketPriceCents = Math.round((side === "YES" ? market.yesPrice : market.noPrice) * 1000) / 10;
+  const [shares, setShares] = useState<string>("10");
+  const [pricePerShareCents, setPricePerShareCents] = useState<string>(marketPriceCents.toFixed(1));
   const [placeOrder, { isLoading, error }] = usePlaceOrderMutation();
   const { data: portfolio } = useGetPortfolioSummaryQuery();
 
   useEffect(() => {
     if (open) {
-      setAmountUsd("5");
+      const initial = Math.round((side === "YES" ? market.yesPrice : market.noPrice) * 1000) / 10;
+      setShares("10");
+      setPricePerShareCents(initial.toFixed(1));
     }
   }, [open, market.id, side]);
 
@@ -33,11 +37,14 @@ export function OrderEntryModal({ market, side, open, onClose }: OrderEntryModal
 
   if (!open) return null;
 
-  const amount = Number(amountUsd) || 0;
-  const probability = side === "YES" ? market.yesPrice : market.noPrice;
-  const estimatedShares = probability > 0 ? amount / probability : 0;
+  const sharesNum = Number(shares) || 0;
+  const priceNum = Number(pricePerShareCents) || 0;
+  const totalCost = (sharesNum * priceNum) / 100;
   const availableCash = portfolio?.availableCash ?? 0;
-  const insufficient = amount > availableCash;
+  const insufficient = totalCost > availableCash;
+  const invalidPrice = priceNum < 0.1 || priceNum >= 100;
+  const canSubmit = sharesNum > 0 && priceNum > 0 && !invalidPrice && !insufficient;
+
   const errorMessage =
     error && "data" in error
       ? (error.data as { message?: string })?.message ?? "Failed to place order"
@@ -45,9 +52,14 @@ export function OrderEntryModal({ market, side, open, onClose }: OrderEntryModal
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (amount <= 0 || insufficient) return;
+    if (!canSubmit) return;
     try {
-      await placeOrder({ marketId: market.id, side, amountUsd: amount }).unwrap();
+      await placeOrder({
+        marketId: market.id,
+        side,
+        shares: sharesNum,
+        pricePerShareCents: priceNum,
+      }).unwrap();
       onClose();
     } catch {
       // error already in `error` from mutation
@@ -103,46 +115,76 @@ export function OrderEntryModal({ market, side, open, onClose }: OrderEntryModal
                 <span className="text-[10px] tracking-[0.05em] font-bold uppercase" style={{ fontFamily: "JetBrains Mono" }}>
                   Buying {side}
                 </span>
-                <span className="text-[20px] font-bold text-on-surface" style={{ fontFamily: "Hanken Grotesk" }}>
-                  {(probability * 100).toFixed(1)}¢
+                <span className="text-[12px] text-on-surface-variant" style={{ fontFamily: "JetBrains Mono" }}>
+                  Market: {marketPriceCents.toFixed(1)}¢
                 </span>
               </div>
             </div>
 
-            <div>
-              <label
-                htmlFor="amountUsd"
-                className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant uppercase block mb-1"
-                style={{ fontFamily: "JetBrains Mono" }}
-              >
-                Amount (USD)
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[14px]">$</span>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  htmlFor="shares"
+                  className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant uppercase block mb-1"
+                  style={{ fontFamily: "JetBrains Mono" }}
+                >
+                  Shares
+                </label>
                 <input
-                  id="amountUsd"
+                  id="shares"
                   type="number"
-                  step="0.01"
-                  min="0.01"
-                  value={amountUsd}
-                  onChange={(e) => setAmountUsd(e.target.value)}
-                  className="w-full pl-7 pr-3 py-2 bg-surface-container-high rounded-sm text-[14px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                  step="1"
+                  min="1"
+                  value={shares}
+                  onChange={(e) => setShares(e.target.value)}
+                  className="w-full px-3 py-2 bg-surface-container-high rounded-sm text-[14px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
                   style={{ fontFamily: "Inter" }}
                   autoFocus
                 />
               </div>
-              <div className="flex justify-between mt-1 text-[12px] text-on-surface-variant" style={{ fontFamily: "JetBrains Mono" }}>
-                <span>Available: {formatCurrency(availableCash)}</span>
-                {insufficient && <span className="text-error">Insufficient balance</span>}
+              <div>
+                <label
+                  htmlFor="pricePerShareCents"
+                  className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant uppercase block mb-1"
+                  style={{ fontFamily: "JetBrains Mono" }}
+                >
+                  Price / share
+                </label>
+                <div className="relative">
+                  <input
+                    id="pricePerShareCents"
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    max="99.9"
+                    value={pricePerShareCents}
+                    onChange={(e) => setPricePerShareCents(e.target.value)}
+                    className="w-full pl-3 pr-8 py-2 bg-surface-container-high rounded-sm text-[14px] text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
+                    style={{ fontFamily: "Inter" }}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[14px]">¢</span>
+                </div>
               </div>
             </div>
 
-            <div className="bg-surface-container rounded-sm p-3">
+            <div className="bg-surface-container rounded-sm p-3 flex flex-col gap-1">
               <div className="flex items-center justify-between text-[13px]" style={{ fontFamily: "Inter" }}>
-                <span className="text-on-surface-variant">Estimated shares</span>
-                <span className="font-bold text-on-surface">{formatNumber(estimatedShares)}</span>
+                <span className="text-on-surface-variant">Total cost</span>
+                <span className="font-bold text-on-surface text-[15px]">{formatCurrency(totalCost)}</span>
+              </div>
+              <div className="flex items-center justify-between text-[12px]" style={{ fontFamily: "JetBrains Mono" }}>
+                <span className="text-on-surface-variant">Available</span>
+                <span className="text-on-surface">{formatCurrency(availableCash)}</span>
               </div>
             </div>
+
+            {(insufficient || invalidPrice) && (
+              <div className="text-[12px] text-error" style={{ fontFamily: "Inter" }}>
+                {invalidPrice
+                  ? "Price must be between 0.1¢ and 99.9¢"
+                  : "Insufficient balance"}
+              </div>
+            )}
 
             {errorMessage && (
               <div className="text-[13px] text-error bg-error-container/30 rounded-sm p-2" style={{ fontFamily: "Inter" }}>
@@ -163,17 +205,17 @@ export function OrderEntryModal({ market, side, open, onClose }: OrderEntryModal
             </button>
             <button
               type="submit"
-              disabled={isLoading || amount <= 0 || insufficient}
+              disabled={isLoading || !canSubmit}
               className={cn(
                 "flex-1 px-4 py-2 text-[14px] font-bold rounded-sm transition-all uppercase tracking-wider",
                 isYes
                   ? "bg-primary text-on-primary hover:opacity-90 active:opacity-80"
                   : "bg-tertiary-container text-on-tertiary-container hover:opacity-90 active:opacity-80",
-                (isLoading || amount <= 0 || insufficient) && "opacity-50 cursor-not-allowed"
+                (isLoading || !canSubmit) && "opacity-50 cursor-not-allowed"
               )}
               style={{ fontFamily: "Inter" }}
             >
-              {isLoading ? "Placing..." : `Buy ${side}`}
+              {isLoading ? "Placing..." : `Buy ${sharesNum} ${side}`}
             </button>
           </div>
         </form>

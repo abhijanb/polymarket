@@ -5,7 +5,8 @@ export type OrderSide = "YES" | "NO";
 export interface PlaceOrderRequest {
   marketId: string;
   side: OrderSide;
-  amountUsd: number;
+  shares: number;
+  pricePerShareCents: number;
 }
 
 export interface PlaceOrderResponse {

@@ -11,15 +11,16 @@ interface PlaceOrderArgs {
   userId: string;
   marketId: string;
   side: "YES" | "NO";
-  amountUsd: number;
+  shares: number;
+  pricePerShareCents: number;
 }
 
-export async function placeOrder({ userId, marketId, side, amountUsd }: PlaceOrderArgs) {
+export async function placeOrder({ userId, marketId, side, shares, pricePerShareCents }: PlaceOrderArgs) {
   return prisma.$transaction(
     async (tx) => {
       const market = await tx.market.findUnique({
         where: { id: marketId },
-        select: { id: true, status: true, outcomes: { where: { label: side }, select: { id: true, probability: true } } },
+        select: { id: true, status: true, outcomes: { where: { label: side }, select: { id: true } } },
       });
 
       if (!market) {
@@ -41,21 +42,20 @@ export async function placeOrder({ userId, marketId, side, amountUsd }: PlaceOrd
         throw new OrderError(404, "User not found");
       }
 
+      const sharesD = new Prisma.Decimal(shares.toFixed(6));
+      const priceD = new Prisma.Decimal((pricePerShareCents / 100).toFixed(4));
+      const amountUsdD = sharesD.times(priceD);
+      const amountUsd = Number(amountUsdD.toFixed(2));
+      const price = priceD;
+
+      if (amountUsd <= 0) {
+        throw new OrderError(400, "Invalid cost");
+      }
+
       const balance = Number(user.balance);
       if (balance < amountUsd) {
         throw new OrderError(400, "Insufficient balance");
       }
-
-      const probability = Number(outcome.probability);
-      const price = new Prisma.Decimal(probability.toFixed(4));
-      const amountUsdDecimal = new Prisma.Decimal(amountUsd.toFixed(2));
-      const sharesDecimal = amountUsdDecimal.dividedBy(price);
-      const shares = Number(sharesDecimal.toFixed(6));
-
-      await tx.user.update({
-        where: { id: userId },
-        data: { balance: { decrement: amountUsdDecimal } },
-      });
 
       const existingPosition = await tx.position.findUnique({
         where: { userId_outcomeId: { userId, outcomeId: outcome.id } },
@@ -65,8 +65,9 @@ export async function placeOrder({ userId, marketId, side, amountUsd }: PlaceOrd
       if (existingPosition) {
         const oldShares = Number(existingPosition.shares);
         const oldAvg = Number(existingPosition.avgPrice);
+        const fillPrice = Number(price);
         const newShares = oldShares + shares;
-        const newAvg = newShares > 0 ? (oldShares * oldAvg + shares * probability) / newShares : 0;
+        const newAvg = newShares > 0 ? (oldShares * oldAvg + shares * fillPrice) / newShares : 0;
         position = await tx.position.update({
           where: { userId_outcomeId: { userId, outcomeId: outcome.id } },
           data: {
@@ -81,7 +82,7 @@ export async function placeOrder({ userId, marketId, side, amountUsd }: PlaceOrd
             marketId,
             outcomeId: outcome.id,
             shares: new Prisma.Decimal(shares.toFixed(6)),
-            avgPrice: new Prisma.Decimal(probability.toFixed(4)),
+            avgPrice: price,
           },
         });
       }
@@ -112,6 +113,11 @@ export async function placeOrder({ userId, marketId, side, amountUsd }: PlaceOrd
         },
       });
 
+      await tx.user.update({
+        where: { id: userId },
+        data: { balance: { decrement: amountUsdD } },
+      });
+
       const updatedUser = await tx.user.findUnique({
         where: { id: userId },
         select: { balance: true },
@@ -122,7 +128,7 @@ export async function placeOrder({ userId, marketId, side, amountUsd }: PlaceOrd
         position,
         trade,
         balance: Number(updatedUser!.balance),
-        probability,
+        probability: Number(price),
         shares,
       };
     },
