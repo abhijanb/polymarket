@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { useGetOrdersQuery } from "@/features/user/api/ordersApi";
-import { cn, formatCurrency, formatNumber } from "@/shared/lib/utils";
+import { useOrderHistory } from "@/features/user/hooks/useOrderHistory";
+import { cn } from "@/shared/lib/utils";
 
 export function OrderHistoryPage() {
-  const { data: orders, isLoading, error, refetch } = useGetOrdersQuery();
+  const { orders, isLoading, error, refetch, count } = useOrderHistory();
 
   return (
     <div className="flex flex-col gap-4">
@@ -31,7 +31,7 @@ export function OrderHistoryPage() {
                 className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant uppercase"
                 style={{ fontFamily: "JetBrains Mono" }}
               >
-                {orders?.length ?? 0} TOTAL
+                {count} TOTAL
               </span>
               <button
                 onClick={() => refetch()}
@@ -53,7 +53,7 @@ export function OrderHistoryPage() {
             <div className="py-8 text-center text-error" style={{ fontFamily: "Inter" }}>
               Error loading orders
             </div>
-          ) : !orders || orders.length === 0 ? (
+          ) : orders.length === 0 ? (
             <div className="py-8 text-center text-on-surface-variant" style={{ fontFamily: "Inter" }}>
               No orders yet. Place a buy from the markets page to see it here.
             </div>
@@ -108,22 +108,18 @@ export function OrderHistoryPage() {
                 </thead>
                 <tbody className="text-[13px]" style={{ fontFamily: "JetBrains Mono" }}>
                   {orders.map((o) => {
-                    const shares = o.shares;
-                    const totalUsd = o.totalCostUsd;
-                    const priceUsd = o.pricePerShareCents / 100;
-                    const isYes = o.outcome === "YES";
                     return (
                       <tr key={o.id} className="data-table-row transition-colors duration-200">
                         <td className="py-3 pr-4">
                           <span className="text-on-surface font-medium" style={{ fontFamily: "Inter" }}>
-                            {o.product.name}
+                            {o.productName}
                           </span>
                         </td>
                         <td className="py-3">
                           <span
                             className={cn(
                               "px-2 py-0.5 rounded-sm text-[10px] font-bold",
-                              isYes
+                              o.isYes
                                 ? "bg-primary/20 text-primary border border-primary/30"
                                 : "bg-tertiary-container text-on-tertiary-container border border-tertiary-container"
                             )}
@@ -131,10 +127,10 @@ export function OrderHistoryPage() {
                             {o.outcome}
                           </span>
                         </td>
-                        <td className="py-3 text-right text-on-surface">{formatNumber(shares)}</td>
-                        <td className="py-3 text-right text-on-surface">{formatCurrency(priceUsd)}</td>
+                        <td className="py-3 text-right text-on-surface">{o.shares}</td>
+                        <td className="py-3 text-right text-on-surface">{o.pricePerShare}</td>
                         <td className="py-3 text-right text-on-surface font-bold">
-                          {formatCurrency(totalUsd)}
+                          {o.totalCost}
                         </td>
                         <td className="py-3">
                           <span
@@ -150,9 +146,7 @@ export function OrderHistoryPage() {
                             {o.status}
                           </span>
                         </td>
-                        <td className="py-3 text-on-surface-variant text-[12px]">
-                          {new Date(o.createdAt).toLocaleString()}
-                        </td>
+                        <td className="py-3 text-on-surface-variant text-[12px]">{o.time}</td>
                       </tr>
                     );
                   })}

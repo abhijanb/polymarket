@@ -1,15 +1,15 @@
-import { useGetPortfolioSummaryQuery } from "@/features/user/api/dashboardApi";
+import { usePortfolio } from "@/features/user/hooks/usePortfolio";
 import { formatCurrency } from "@/shared/lib/utils";
 
 export function UserHome() {
-  const { data: portfolio, isLoading: portfolioLoading } = useGetPortfolioSummaryQuery();
+  const { portfolio, isLoading } = usePortfolio();
 
   return (
     <>
       {/* Portfolio Overview */}
       <section className="terminal-bento grid grid-cols-12 mb-6">
         <div className="col-span-12 pane flex flex-col gap-4">
-          {portfolioLoading || !portfolio ? (
+          {isLoading || !portfolio ? (
             <div className="animate-pulse flex flex-col gap-3 flex-1">
               <div className="h-5 w-32 bg-surface-container-high rounded-sm" />
               <div className="h-10 w-3/4 bg-surface-container-high rounded-sm" />
