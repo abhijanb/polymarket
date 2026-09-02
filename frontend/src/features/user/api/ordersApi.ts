@@ -1,10 +1,10 @@
 import { baseApi } from "@/shared/api/baseApi";
 
-export type OrderSide = "YES" | "NO";
+export type OrderOutcome = "YES" | "NO";
 
 export interface PlaceOrderRequest {
-  marketId: string;
-  side: OrderSide;
+  productId: string;
+  outcome: OrderOutcome;
   shares: number;
   pricePerShareCents: number;
 }
@@ -14,33 +14,14 @@ export interface PlaceOrderResponse {
   order: {
     id: string;
     userId: string;
-    marketId: string;
-    outcomeId: string;
-    outcomeLabel: string;
-    price: string;
+    productId: string;
+    outcome: string;
+    shares: number;
+    filled: number;
     pricePerShareCents: number;
-    shares: string;
-    totalCostUsd: string;
+    totalCostUsd: number;
     status: string;
     createdAt: string;
-  };
-  position: {
-    id: string;
-    userId: string;
-    marketId: string;
-    outcomeId: string;
-    shares: string;
-    avgPrice: string;
-  };
-  trade: {
-    id: string;
-    orderId: string;
-    userId: string;
-    outcomeId: string;
-    price: string;
-    pricePerShareCents: number;
-    shares: string;
-    totalCostUsd: string;
   };
   balance: number;
   probability: number;
@@ -49,19 +30,18 @@ export interface PlaceOrderResponse {
 
 export interface OrderHistoryItem {
   id: string;
-  outcomeLabel: string;
-  price: string;
-  pricePerShareCents: number;
+  userId: string;
+  productId: string;
+  outcome: string;
   shares: string;
+  filled: string;
+  pricePerShareCents: number;
   totalCostUsd: string;
   status: string;
   createdAt: string;
-  marketId: string;
-  userId: string;
-  market: {
-    title: string;
-    category: string;
-    resolutionDate: string;
+  product: {
+    name: string;
+    status: string;
   };
 }
 
@@ -69,7 +49,7 @@ export const ordersApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     placeOrder: build.mutation<PlaceOrderResponse, PlaceOrderRequest>({
       query: (body) => ({ url: "/api/user/orders", method: "POST", body }),
-      invalidatesTags: ["Market", "Auth", "Order"],
+      invalidatesTags: ["Auth", "Order"],
     }),
     getOrders: build.query<OrderHistoryItem[], void>({
       query: () => "/api/user/orders",
