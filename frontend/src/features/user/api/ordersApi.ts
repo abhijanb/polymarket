@@ -16,11 +16,12 @@ export interface PlaceOrderResponse {
     userId: string;
     marketId: string;
     outcomeId: string;
-    side: "BUY" | "SELL";
+    outcomeLabel: string;
     price: string;
-    amount: string;
-    filled: string;
-    status: "OPEN" | "PARTIAL" | "FILLED" | "CANCELLED";
+    pricePerShareCents: number;
+    shares: string;
+    totalCostUsd: string;
+    status: string;
     createdAt: string;
   };
   position: {
@@ -33,26 +34,48 @@ export interface PlaceOrderResponse {
   };
   trade: {
     id: string;
-    marketId: string;
+    orderId: string;
+    userId: string;
     outcomeId: string;
-    buyerId: string;
-    sellerId: string;
     price: string;
-    amount: string;
-    createdAt: string;
+    pricePerShareCents: number;
+    shares: string;
+    totalCostUsd: string;
   };
   balance: number;
   probability: number;
   shares: number;
 }
 
+export interface OrderHistoryItem {
+  id: string;
+  outcomeLabel: string;
+  price: string;
+  pricePerShareCents: number;
+  shares: string;
+  totalCostUsd: string;
+  status: string;
+  createdAt: string;
+  marketId: string;
+  userId: string;
+  market: {
+    title: string;
+    category: string;
+    resolutionDate: string;
+  };
+}
+
 export const ordersApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     placeOrder: build.mutation<PlaceOrderResponse, PlaceOrderRequest>({
       query: (body) => ({ url: "/api/user/orders", method: "POST", body }),
-      invalidatesTags: ["Market", "Auth"],
+      invalidatesTags: ["Market", "Auth", "Order"],
+    }),
+    getOrders: build.query<OrderHistoryItem[], void>({
+      query: () => "/api/user/orders",
+      providesTags: ["Order"],
     }),
   }),
 });
 
-export const { usePlaceOrderMutation } = ordersApi;
+export const { usePlaceOrderMutation, useGetOrdersQuery } = ordersApi;

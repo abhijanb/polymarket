@@ -70,8 +70,8 @@ async function main() {
         creatorId: admin.id,
         outcomes: {
           create: [
-            { label: "YES", probability: 0.5 },
-            { label: "NO", probability: 0.5 },
+            { label: "YES" },
+            { label: "NO" },
           ],
         },
       },
