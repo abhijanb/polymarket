@@ -1,16 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, Outlet, useOutletContext } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { useAppSelector } from "@/shared/store/hooks";
 import { useLogout } from "@/features/auth/hooks/useLogout";
-import { OrderEntryModal } from "@/features/user/components/OrderEntryModal";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  outcomeTime?: string;
-}
 
 export function UserLayout() {
   const user = useAppSelector((s) => s.auth.user);
@@ -18,7 +9,6 @@ export function UserLayout() {
 
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
-  const [orderModal, setOrderModal] = useState<{ product: Product; outcome: "YES" | "NO" } | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -126,21 +116,8 @@ export function UserLayout() {
       </header>
 
       <main className="mt-16 h-[calc(100vh-64px)] overflow-y-auto p-[24px] bg-surface-canvas">
-        <Outlet context={{ setOrderModal }} />
+        <Outlet />
       </main>
-
-      {orderModal && (
-        <OrderEntryModal
-          product={orderModal.product}
-          outcome={orderModal.outcome}
-          open={true}
-          onClose={() => setOrderModal(null)}
-        />
-      )}
     </div>
   );
-}
-
-export function useUserLayout() {
-  return useOutletContext<{ setOrderModal: (m: { product: Product; outcome: "YES" | "NO" } | null) => void }>();
 }
