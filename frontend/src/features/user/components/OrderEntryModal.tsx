@@ -1,30 +1,35 @@
 import { useState, useEffect } from "react";
-import { usePlaceOrderMutation, type OrderSide } from "@/features/user/api/ordersApi";
-import type { MarketDashboard } from "@/features/user/model/dashboardTypes";
+import { usePlaceOrderMutation, type OrderOutcome } from "@/features/user/api/ordersApi";
 import { cn, formatCurrency, formatNumber } from "@/shared/lib/utils";
 import { useGetPortfolioSummaryQuery } from "@/features/user/api/dashboardApi";
 
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  outcomeTime?: string;
+}
+
 interface OrderEntryModalProps {
-  market: MarketDashboard;
-  side: OrderSide;
+  product: Product;
+  outcome: OrderOutcome;
   open: boolean;
   onClose: () => void;
 }
 
-export function OrderEntryModal({ market, side, open, onClose }: OrderEntryModalProps) {
-  const marketPriceCents = Math.round((side === "YES" ? market.yesPrice : market.noPrice) * 1000) / 10;
+export function OrderEntryModal({ product, outcome, open, onClose }: OrderEntryModalProps) {
   const [shares, setShares] = useState<string>("10");
-  const [pricePerShareCents, setPricePerShareCents] = useState<string>(marketPriceCents.toFixed(1));
+  const [pricePerShareCents, setPricePerShareCents] = useState<string>("50.0");
   const [placeOrder, { isLoading, error }] = usePlaceOrderMutation();
   const { data: portfolio } = useGetPortfolioSummaryQuery();
 
   useEffect(() => {
     if (open) {
-      const initial = Math.round((side === "YES" ? market.yesPrice : market.noPrice) * 1000) / 10;
       setShares("10");
-      setPricePerShareCents(initial.toFixed(1));
+      setPricePerShareCents("50.0");
     }
-  }, [open, market.id, side]);
+  }, [open, product.id, outcome]);
 
   useEffect(() => {
     if (!open) return;
@@ -55,8 +60,8 @@ export function OrderEntryModal({ market, side, open, onClose }: OrderEntryModal
     if (!canSubmit) return;
     try {
       await placeOrder({
-        marketId: market.id,
-        side,
+        productId: product.id,
+        outcome,
         shares: sharesNum,
         pricePerShareCents: priceNum,
       }).unwrap();
@@ -66,7 +71,7 @@ export function OrderEntryModal({ market, side, open, onClose }: OrderEntryModal
     }
   };
 
-  const isYes = side === "YES";
+  const isYes = outcome === "YES";
 
   return (
     <div
@@ -93,16 +98,15 @@ export function OrderEntryModal({ market, side, open, onClose }: OrderEntryModal
 
           <div className="p-4 flex flex-col gap-4">
             <div>
-              <span className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant uppercase" style={{ fontFamily: "JetBrains Mono" }}>
-                Market
+              <span className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant uppercase block mb-1" style={{ fontFamily: "JetBrains Mono" }}>
+                Product
               </span>
               <p className="text-[14px] text-on-surface mt-1 line-clamp-2" style={{ fontFamily: "Inter" }}>
-                {market.title}
+                {product.name}
               </p>
-              <div className="flex items-center gap-2 mt-2 text-[12px] text-on-surface-variant" style={{ fontFamily: "JetBrains Mono" }}>
-                <span className="px-2 py-0.5 bg-surface-container-high rounded-sm">{market.category}</span>
-                <span>Ends {market.endsAt}</span>
-              </div>
+              <p className="text-[12px] text-on-surface-variant mt-1 line-clamp-2" style={{ fontFamily: "Inter" }}>
+                {product.description}
+              </p>
             </div>
 
             <div
@@ -113,10 +117,10 @@ export function OrderEntryModal({ market, side, open, onClose }: OrderEntryModal
             >
               <div className="flex items-center justify-between">
                 <span className="text-[10px] tracking-[0.05em] font-bold uppercase" style={{ fontFamily: "JetBrains Mono" }}>
-                  Buying {side}
+                  Buying {outcome}
                 </span>
                 <span className="text-[12px] text-on-surface-variant" style={{ fontFamily: "JetBrains Mono" }}>
-                  Market: {marketPriceCents.toFixed(1)}¢
+                  Price: {pricePerShareCents}¢
                 </span>
               </div>
             </div>
@@ -215,7 +219,7 @@ export function OrderEntryModal({ market, side, open, onClose }: OrderEntryModal
               )}
               style={{ fontFamily: "Inter" }}
             >
-              {isLoading ? "Placing..." : `Buy ${sharesNum} ${side}`}
+              {isLoading ? "Placing..." : `Buy ${sharesNum} ${outcome}`}
             </button>
           </div>
         </form>
