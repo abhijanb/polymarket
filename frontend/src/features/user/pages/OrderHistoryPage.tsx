@@ -2,14 +2,6 @@ import { Link } from "react-router-dom";
 import { useGetOrdersQuery } from "@/features/user/api/ordersApi";
 import { cn, formatCurrency, formatNumber } from "@/shared/lib/utils";
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Crypto: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  Politics: "bg-red-500/20 text-red-400 border-red-500/30",
-  Economics: "bg-green-500/20 text-green-400 border-green-500/30",
-  Sports: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  Science: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-};
-
 export function OrderHistoryPage() {
   const { data: orders, isLoading, error, refetch } = useGetOrdersQuery();
 
@@ -74,7 +66,7 @@ export function OrderHistoryPage() {
                       className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2"
                       style={{ fontFamily: "JetBrains Mono" }}
                     >
-                      MARKET
+                      PRODUCT
                     </th>
                     <th
                       className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2"
@@ -116,26 +108,16 @@ export function OrderHistoryPage() {
                 </thead>
                 <tbody className="text-[13px]" style={{ fontFamily: "JetBrains Mono" }}>
                   {orders.map((o) => {
-                    const shares = Number(o.shares);
-                    const totalUsd = Number(o.totalCostUsd);
+                    const shares = o.shares;
+                    const totalUsd = o.totalCostUsd;
                     const priceUsd = o.pricePerShareCents / 100;
-                    const isYes = o.outcomeLabel === "YES";
+                    const isYes = o.outcome === "YES";
                     return (
                       <tr key={o.id} className="data-table-row transition-colors duration-200">
                         <td className="py-3 pr-4">
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-on-surface font-medium" style={{ fontFamily: "Inter" }}>
-                              {o.market.title}
-                            </span>
-                            <span
-                              className={cn(
-                                "px-1.5 py-0.5 rounded-sm text-[9px] font-bold border w-fit",
-                                CATEGORY_COLORS[o.market.category] || "bg-gray-500/20 text-gray-400 border-gray-500/30"
-                              )}
-                            >
-                              {o.market.category.toUpperCase()}
-                            </span>
-                          </div>
+                          <span className="text-on-surface font-medium" style={{ fontFamily: "Inter" }}>
+                            {o.product.name}
+                          </span>
                         </td>
                         <td className="py-3">
                           <span
@@ -146,7 +128,7 @@ export function OrderHistoryPage() {
                                 : "bg-tertiary-container text-on-tertiary-container border border-tertiary-container"
                             )}
                           >
-                            {o.outcomeLabel}
+                            {o.outcome}
                           </span>
                         </td>
                         <td className="py-3 text-right text-on-surface">{formatNumber(shares)}</td>

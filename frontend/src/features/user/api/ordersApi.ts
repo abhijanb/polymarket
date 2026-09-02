@@ -33,10 +33,10 @@ export interface OrderHistoryItem {
   userId: string;
   productId: string;
   outcome: string;
-  shares: string;
-  filled: string;
+  shares: number;
+  filled: number;
   pricePerShareCents: number;
-  totalCostUsd: string;
+  totalCostUsd: number;
   status: string;
   createdAt: string;
   product: {
