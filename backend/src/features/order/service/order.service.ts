@@ -1,5 +1,6 @@
 import { prisma } from "../../../lib/prisma";
 import { Prisma } from "../../../generated/prisma/client";
+import { logger } from "../../../lib/logger";
 
 export class OrderError extends Error {
   constructor(public status: number, message: string) {
@@ -16,6 +17,7 @@ interface PlaceOrderArgs {
 }
 
 export async function placeOrder({ userId, productId, outcome, shares, pricePerShareCents }: PlaceOrderArgs) {
+  logger.debug("order.service.place.start", { userId, productId, shares });
   return prisma.$transaction(
     async (tx) => {
       const product = await tx.product.findUnique({
@@ -24,9 +26,15 @@ export async function placeOrder({ userId, productId, outcome, shares, pricePerS
       });
 
       if (!product) {
+        logger.warn("order.service.place.product_not_found", { userId, productId });
         throw new OrderError(404, "Product not found");
       }
       if (product.status !== "ACTIVE") {
+        logger.warn("order.service.place.product_inactive", {
+          userId,
+          productId,
+          status: product.status,
+        });
         throw new OrderError(400, "Product is not active");
       }
 
@@ -35,16 +43,23 @@ export async function placeOrder({ userId, productId, outcome, shares, pricePerS
         select: { balance: true },
       });
       if (!user) {
+        logger.warn("order.service.place.user_not_found", { userId });
         throw new OrderError(404, "User not found");
       }
 
       const totalCost = shares * pricePerShareCents;
       if (totalCost <= 0) {
+        logger.warn("order.service.place.invalid_cost", { userId, totalCost });
         throw new OrderError(400, "Invalid cost");
       }
 
       const balance = Number(user.balance);
       if (balance < totalCost) {
+        logger.warn("order.service.place.insufficient_balance", {
+          userId,
+          balance,
+          totalCost,
+        });
         throw new OrderError(400, "Insufficient balance");
       }
 
@@ -71,6 +86,12 @@ export async function placeOrder({ userId, productId, outcome, shares, pricePerS
         select: { balance: true },
       });
 
+      logger.debug("order.service.place.committed", {
+        userId,
+        orderId: order.id,
+        totalCost,
+      });
+
       return {
         order,
         balance: Number(updatedUser!.balance),
@@ -83,7 +104,8 @@ export async function placeOrder({ userId, productId, outcome, shares, pricePerS
 }
 
 export async function getUserOrders(userId: string) {
-  return prisma.order.findMany({
+  logger.debug("order.service.list.start", { userId });
+  const orders = await prisma.order.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
     take: 100,
@@ -91,4 +113,6 @@ export async function getUserOrders(userId: string) {
       product: { select: { name: true, status: true } },
     },
   });
+  logger.debug("order.service.list.done", { userId, count: orders.length });
+  return orders;
 }

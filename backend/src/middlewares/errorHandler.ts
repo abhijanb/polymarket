@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
+import { logger } from "../lib/logger";
 
 export function errorHandler(
   err: any,
@@ -7,7 +8,14 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ) {
-  console.error("[errorHandler]", err);
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+
+  if (status >= 500) {
+    logger.error("http.error", { status, message }, err);
+  } else {
+    logger.warn("http.client_error", { status, message }, err);
+  }
 
   if (err instanceof ZodError) {
     return res.status(400).json({
@@ -27,9 +35,6 @@ export function errorHandler(
       })),
     });
   }
-
-  const status = err.status || err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
 
   res.status(status).json({
     success: false,
