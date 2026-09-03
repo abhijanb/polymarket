@@ -1,6 +1,7 @@
 import { AdminLayout } from "@/features/admin/layout/AdminLayout";
 import { AdminHome } from "@/features/admin/pages/AdminHome";
 import { AdminUsers } from "@/features/admin/pages/AdminUsers";
+import { AdminUserDetailPage } from "@/features/admin/pages/AdminUserDetailPage";
 import { MarketList } from "@/features/admin/market/pages/MarketList";
 import { CreateMarketPage } from "@/features/admin/market/pages/CreateMarketPage";
 import { MarketDetail } from "@/features/admin/market/pages/MarketDetail";
@@ -20,5 +21,6 @@ export const adminRoute = {
     { path: "/admin/markets/:id", element: <MarketDetail /> },
     { path: "/admin/markets/:id/edit", element: <EditMarketPage /> },
     { path: "/admin/users", element: <AdminUsers /> },
+    { path: "/admin/users/:id", element: <AdminUserDetailPage /> },
   ],
 };

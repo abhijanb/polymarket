@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useGetUsersQuery } from "@/features/admin/api/userApi";
 import type { User } from "@/shared/types/user";
 
@@ -47,18 +48,21 @@ export function AdminUsers() {
                   <th className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2 font-normal text-right" style={{ fontFamily: "JetBrains Mono" }}>
                     CREATED
                   </th>
+                  <th className="text-[10px] tracking-[0.05em] font-bold text-on-surface-variant py-2 font-normal text-right" style={{ fontFamily: "JetBrains Mono" }}>
+                    ACTION
+                  </th>
                 </tr>
               </thead>
               <tbody className="text-[12px]" style={{ fontFamily: "JetBrains Mono" }}>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-on-surface-variant">
+                    <td colSpan={5} className="py-8 text-center text-on-surface-variant">
                       Loading users...
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-on-surface-variant">
+                    <td colSpan={5} className="py-8 text-center text-on-surface-variant">
                       No users found.
                     </td>
                   </tr>
@@ -81,6 +85,15 @@ export function AdminUsers() {
                       </td>
                       <td className="py-3 text-on-surface-variant text-right">
                         {new Date(user.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 text-right">
+                        <Link
+                          to={`/admin/users/${user.id}`}
+                          className="inline-flex items-center gap-1 text-primary text-[11px] font-bold hover:underline"
+                          style={{ fontFamily: "JetBrains Mono" }}
+                        >
+                          View →
+                        </Link>
                       </td>
                     </tr>
                   ))

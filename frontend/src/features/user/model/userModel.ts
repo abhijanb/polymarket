@@ -83,10 +83,25 @@ export function getStatusTone(status: OrderStatusDto | string): OrderStatusTone 
   return "other";
 }
 
+export function getResultTone(result: string): OrderResultTone {
+  if (result === "WIN") return "win";
+  if (result === "LOSS") return "loss";
+  if (result === "VOID") return "void";
+  return "pending";
+}
+
+export function resultLabel(result: string): string {
+  if (result === "WIN") return "Won";
+  if (result === "LOSS") return "Lost";
+  if (result === "VOID") return "Void";
+  return "Pending";
+}
+
 export function toRecentOrderVm(dto: OrderDto): RecentOrderVm {
   const outcome = dto.outcome ?? "";
   const isYes = outcome === "YES";
   const created = dto.createdAt ? new Date(dto.createdAt) : new Date();
+  const result = (dto.result ?? "PENDING") as RecentOrderVm["result"];
   return {
     id: dto.id,
     productName: dto.product?.name ?? "Unknown market",
@@ -97,6 +112,9 @@ export function toRecentOrderVm(dto: OrderDto): RecentOrderVm {
     totalCostDisplay: _formatCurrency(Number(dto.totalCostUsd ?? 0)),
     status: dto.status ?? "—",
     statusTone: getStatusTone(dto.status),
+    result,
+    resultTone: getResultTone(result),
+    resultLabel: resultLabel(result),
     time: created.toLocaleString(),
     timeRelative: _formatRelativeTime(created),
     createdAtIso: dto.createdAt,

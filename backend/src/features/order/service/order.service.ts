@@ -97,7 +97,7 @@ export async function placeOrder({ userId, productId, outcome, shares, pricePerS
 
       const result: OrderResult = deriveResult(order, product);
       return {
-        order,
+        order: { ...order, result },
         balance: Number(updatedUser!.balance),
         probability: pricePerShareCents / 100,
         shares,

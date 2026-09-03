@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/shared/lib/utils";
 import { emptyStates, type RecentOrderVm } from "@/features/user/model/userModel";
-import { OrderStatusPill } from "./OrderStatusPill";
+import { OrderResultPill } from "./OrderStatusPill";
 import { RecentActivitySkeleton } from "./Skeletons";
 
 export function RecentActivityList({
@@ -123,7 +123,11 @@ export function RecentActivityList({
               >
                 {o.totalCostDisplay}
               </span>
-              <OrderStatusPill status={o.status} tone={o.statusTone} />
+              <OrderResultPill
+                result={o.result}
+                tone={o.resultTone}
+                label={o.resultLabel}
+              />
             </div>
           </li>
         ))}
