@@ -1,6 +1,9 @@
 import { prisma } from "../../../lib/prisma";
 import { Prisma } from "../../../generated/prisma/client";
 import { logger } from "../../../lib/logger";
+import { deriveResult } from "../lib/result";
+import type { OrderResult } from "../lib/result";
+import { getOrdersForUser as _getOrdersForUser } from "../lib/orders";
 
 export class OrderError extends Error {
   constructor(public status: number, message: string) {
@@ -22,7 +25,7 @@ export async function placeOrder({ userId, productId, outcome, shares, pricePerS
     async (tx) => {
       const product = await tx.product.findUnique({
         where: { id: productId },
-        select: { id: true, status: true, name: true },
+        select: { id: true, status: true, name: true, outcome: true },
       });
 
       if (!product) {
@@ -92,11 +95,13 @@ export async function placeOrder({ userId, productId, outcome, shares, pricePerS
         totalCost,
       });
 
+      const result: OrderResult = deriveResult(order, product);
       return {
         order,
         balance: Number(updatedUser!.balance),
         probability: pricePerShareCents / 100,
         shares,
+        result,
       };
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
@@ -105,14 +110,7 @@ export async function placeOrder({ userId, productId, outcome, shares, pricePerS
 
 export async function getUserOrders(userId: string) {
   logger.debug("order.service.list.start", { userId });
-  const orders = await prisma.order.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    include: {
-      product: { select: { name: true, status: true } },
-    },
-  });
+  const orders = await _getOrdersForUser(userId);
   logger.debug("order.service.list.done", { userId, count: orders.length });
   return orders;
 }

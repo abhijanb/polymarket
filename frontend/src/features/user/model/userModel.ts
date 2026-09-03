@@ -24,6 +24,7 @@ export interface PortfolioVm {
 }
 
 export type OrderStatusTone = "filled" | "open" | "partial" | "other";
+export type OrderResultTone = "win" | "loss" | "pending" | "void";
 
 export interface RecentOrderVm {
   id: string;
@@ -35,6 +36,9 @@ export interface RecentOrderVm {
   totalCostDisplay: string;
   status: string;
   statusTone: OrderStatusTone;
+  result: "WIN" | "LOSS" | "PENDING" | "VOID";
+  resultTone: OrderResultTone;
+  resultLabel: string;
   time: string;
   timeRelative: string;
   createdAtIso: string;

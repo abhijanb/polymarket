@@ -23,6 +23,7 @@ export interface OrderDto {
   pricePerShareCents: number;
   totalCostUsd: number;
   status: OrderStatusDto;
+  result: "WIN" | "LOSS" | "PENDING" | "VOID";
   createdAt: string;
   product: {
     name: string;
@@ -45,6 +46,7 @@ export interface PlaceOrderResponse {
   balance: number;
   probability: number;
   shares: number;
+  result: "WIN" | "LOSS" | "PENDING" | "VOID";
 }
 
 /**
