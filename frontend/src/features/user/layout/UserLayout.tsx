@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { useAppSelector } from "@/shared/store/hooks";
 import { useLogout } from "@/features/auth/hooks/useLogout";
+import { cn } from "@/shared/lib/utils";
 
 export function UserLayout() {
   const user = useAppSelector((s) => s.auth.user);
@@ -31,7 +32,9 @@ export function UserLayout() {
 
   return (
     <div className="h-screen overflow-hidden bg-surface-canvas font-sans">
-      <header className="fixed top-0 left-0 right-0 h-16 bg-surface border-b border-outline-variant z-50 flex items-center px-[24px]">
+      <header
+        className="fixed top-0 left-0 right-0 h-16 bg-surface/95 backdrop-blur-sm border-b border-outline-variant z-50 flex items-center px-6"
+      >
         <div className="flex items-center gap-8 flex-1">
           <Link
             to="/user"
@@ -41,20 +44,21 @@ export function UserLayout() {
             PREDICTX
           </Link>
         </div>
-        <div className="flex items-center gap-4">
-          <button className="p-2 rounded-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+        <div className="flex items-center gap-3">
+          <button
+            className="p-2 rounded-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"
+            aria-label="Notifications"
+            title="Notifications"
+          >
             <span className="material-symbols-outlined">notifications</span>
-          </button>
-          <button className="px-4 py-2 bg-primary text-on-primary text-[14px] font-bold rounded-sm hover:opacity-90 active:opacity-80 transition-all uppercase tracking-wider">
-            Connect Wallet
-          </button>
-          <button className="md:hidden p-2 rounded-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
-            <span className="material-symbols-outlined">menu</span>
           </button>
           <div ref={profileRef} className="relative">
             <button
               onClick={() => setProfileOpen(!profileOpen)}
               className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant bg-primary/20 focus:outline-none focus:ring-1 focus:ring-primary"
+              aria-haspopup="menu"
+              aria-expanded={profileOpen}
+              aria-label="Open profile menu"
             >
               <img
                 alt="Profile"
@@ -63,28 +67,51 @@ export function UserLayout() {
               />
             </button>
             {profileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-surface border border-outline-variant rounded-sm shadow-lg z-50 py-2">
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-2 w-60 bg-surface-container border border-outline-variant rounded-sm shadow-lg z-50 py-1 backdrop-blur-sm"
+              >
                 <div className="px-4 py-3 border-b border-outline-variant">
-                  <span className="block text-[14px] font-medium text-on-surface">
+                  <span
+                    className="block text-[14px] font-medium text-on-surface truncate"
+                    style={{ fontFamily: "Inter" }}
+                    title={user?.name || "User"}
+                  >
                     {user?.name || "User"}
                   </span>
-                  <span className="text-[12px] text-on-surface-variant">{user?.email}</span>
+                  <span
+                    className="block text-[12px] text-on-surface-variant truncate"
+                    style={{ fontFamily: "JetBrains Mono" }}
+                    title={user?.email || ""}
+                  >
+                    {user?.email}
+                  </span>
                 </div>
                 <Link
                   to="/user/orders"
                   onClick={() => setProfileOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2 text-[14px] text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors"
+                  role="menuitem"
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-2 text-[14px] text-on-surface-variant",
+                    "hover:text-on-surface hover:bg-surface-container-low transition-colors"
+                  )}
                   style={{ fontFamily: "Inter" }}
                 >
                   <span className="material-symbols-outlined text-[18px]">receipt_long</span>
                   Order History
                 </Link>
+                <div className="my-1 border-t border-outline-variant" />
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
+                    setProfileOpen(false);
                     handleLogout();
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-[14px] text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors text-left"
+                  role="menuitem"
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-2 text-[14px] text-on-surface-variant",
+                    "hover:text-on-surface hover:bg-surface-container-low transition-colors text-left"
+                  )}
                   style={{ fontFamily: "Inter" }}
                 >
                   <span className="material-symbols-outlined text-[18px]">logout</span>
@@ -93,13 +120,10 @@ export function UserLayout() {
               </div>
             )}
           </div>
-          <span className="text-[12px] text-on-surface-variant" style={{ fontFamily: "JetBrains Mono" }}>
-            {user?.name || user?.email || ""}
-          </span>
         </div>
       </header>
 
-      <main className="mt-16 h-[calc(100vh-64px)] overflow-y-auto p-[24px] bg-surface-canvas">
+      <main className="mt-16 h-[calc(100vh-64px)] overflow-y-auto p-6 bg-surface-canvas">
         <Outlet />
       </main>
     </div>

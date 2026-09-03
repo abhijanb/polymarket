@@ -171,6 +171,18 @@
 .bid-progress { background: linear-gradient(90deg, rgba(0, 185, 84, 0.15) 0%, rgba(0, 185, 84, 0) 100%); }
 .ask-progress { background: linear-gradient(90deg, rgba(255, 84, 81, 0.15) 0%, rgba(255, 84, 81, 0) 100%); }
 
+/* Empty state helper — used by /user home and order history */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--color-on-surface-variant);
+  text-align: center;
+}
+
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }

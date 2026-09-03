@@ -1,9 +1,9 @@
 import { baseApi } from "@/shared/api/baseApi";
-import type { PortfolioSummary } from "../model/dashboardTypes";
+import type { PortfolioDto } from "@/features/user/model/dashboardTypes";
 
 export const dashboardApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    getPortfolioSummary: build.query<PortfolioSummary, void>({
+    getPortfolioSummary: build.query<PortfolioDto, void>({
       query: () => "/api/user/portfolio",
       providesTags: ["Auth"],
     }),
