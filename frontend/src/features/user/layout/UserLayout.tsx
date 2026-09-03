@@ -79,22 +79,6 @@ export function UserLayout() {
                   <span className="material-symbols-outlined text-[18px]">receipt_long</span>
                   Order History
                 </Link>
-                <a
-                  href="#settings"
-                  className="flex items-center gap-3 px-4 py-2 text-[14px] text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors"
-                  style={{ fontFamily: "Inter" }}
-                >
-                  <span className="material-symbols-outlined text-[18px]">settings</span>
-                  Settings
-                </a>
-                <a
-                  href="#support"
-                  className="flex items-center gap-3 px-4 py-2 text-[14px] text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors"
-                  style={{ fontFamily: "Inter" }}
-                >
-                  <span className="material-symbols-outlined text-[18px]">support</span>
-                  Support
-                </a>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
