@@ -2,6 +2,15 @@ import "dotenv/config";
 import { prisma } from "../src/lib/prisma";
 import { hashPassword } from "abhijanb";
 
+interface SeedProduct {
+  name: string;
+  description: string;
+  category: "Crypto" | "Politics" | "Economics" | "Sports" | "Science";
+  status: "DRAFT" | "ACTIVE" | "RESOLVED";
+  outcome: "YES" | "NO" | null;
+  outcomeOffsetDays: number;
+}
+
 async function main() {
   const email = process.env.ADMIN_EMAIL || "admin@polymarket.local";
   const password = process.env.ADMIN_PASSWORD || "Admin123!";
@@ -21,65 +30,126 @@ async function main() {
 
   console.log(`Seeded admin: ${admin.email} (${admin.role}) id=${admin.id}`);
 
-  const sampleMarkets = [
+  const sampleProducts: SeedProduct[] = [
     {
-      title: "Will Bitcoin reach $100,000 by end of 2025?",
+      name: "Will Bitcoin reach $150,000 by end of 2026?",
       description:
-        "This market resolves to YES if the Coinbase Bitcoin price index closes at or above $100,000 USD on any business day in December 2025.",
-      category: "Crypto" as const,
-      resolutionDate: new Date("2025-12-31T23:59:59Z"),
-      oracleUrl: "https://api.coinbase.com/v2/prices/BTC-USD/spot",
+        "[Crypto] Resolves YES if the Coinbase BTC-USD spot index closes at or above $150,000 on any business day in December 2026.",
+      category: "Crypto",
+      status: "ACTIVE",
+      outcome: null,
+      outcomeOffsetDays: 120,
     },
     {
-      title: "Will Ethereum Spot ETF be approved by May 2025?",
+      name: "Will Ethereum hit $10,000 in 2026?",
       description:
-        "This market resolves to YES if the U.S. SEC approves at least one spot Ethereum ETF by May 31, 2025.",
-      category: "Crypto" as const,
-      resolutionDate: new Date("2025-05-31T23:59:59Z"),
-      oracleUrl: "https://www.sec.gov",
+        "[Crypto] Resolves YES if ETH-USD closes at or above $10,000 on any Coinbase spot print in 2026.",
+      category: "Crypto",
+      status: "ACTIVE",
+      outcome: null,
+      outcomeOffsetDays: 200,
     },
     {
-      title: "Will Donald Trump win the 2024 U.S. Presidential Election?",
+      name: "Will the U.S. Fed cut rates before Q3 2026?",
       description:
-        "This market resolves to YES if Donald Trump wins the majority of electoral votes in the 2024 election.",
-      category: "Politics" as const,
-      resolutionDate: new Date("2024-11-05T23:59:59Z"),
-      oracleUrl: "https://www.fec.gov",
+        "[Economics] Resolves YES if the FOMC lowers the target federal funds range at any meeting before September 30, 2026.",
+      category: "Economics",
+      status: "ACTIVE",
+      outcome: null,
+      outcomeOffsetDays: 90,
     },
     {
-      title: "Will the Fed cut interest rates in June 2025?",
+      name: "Will there be a U.S. government shutdown in 2026?",
       description:
-        "This market resolves to YES if the Federal Reserve lowers the target range for the federal funds rate at any FOMC meeting between June 1 and June 30, 2025.",
-      category: "Economics" as const,
-      resolutionDate: new Date("2025-06-30T23:59:59Z"),
-      oracleUrl: "https://www.federalreserve.gov",
+        "[Politics] Resolves YES if any federal agency experiences a funding lapse lasting 24+ hours in calendar year 2026.",
+      category: "Politics",
+      status: "ACTIVE",
+      outcome: null,
+      outcomeOffsetDays: 180,
+    },
+    {
+      name: "Will SpaceX achieve a crewed Mars flyby by 2030?",
+      description:
+        "[Science] Resolves YES if a SpaceX vehicle carrying a crew completes a Mars flyby maneuver before January 1, 2030.",
+      category: "Science",
+      status: "ACTIVE",
+      outcome: null,
+      outcomeOffsetDays: 1200,
+    },
+    {
+      name: "Will the 2026 FIFA World Cup final go to extra time?",
+      description:
+        "[Sports] Resolves YES if the 2026 World Cup final is tied at the end of regular time and goes to extra time.",
+      category: "Sports",
+      status: "ACTIVE",
+      outcome: null,
+      outcomeOffsetDays: 200,
+    },
+    {
+      name: "Will Apple release a foldable iPhone in 2026?",
+      description:
+        "[Science] Resolves YES if Apple ships a consumer foldable iPhone (any form factor) in calendar year 2026.",
+      category: "Science",
+      status: "DRAFT",
+      outcome: null,
+      outcomeOffsetDays: 250,
+    },
+    {
+      name: "Will the UK hold a general election in 2026?",
+      description:
+        "[Politics] Resolves YES if a UK general election polling day occurs in calendar year 2026.",
+      category: "Politics",
+      status: "DRAFT",
+      outcome: null,
+      outcomeOffsetDays: 250,
+    },
+    {
+      name: "Did the SEC approve a spot SOL ETF in 2025?",
+      description:
+        "[Crypto] Resolves YES if the U.S. SEC approved at least one spot Solana ETF in 2025. Resolved as YES.",
+      category: "Crypto",
+      status: "RESOLVED",
+      outcome: "YES",
+      outcomeOffsetDays: -90,
+    },
+    {
+      name: "Did global temperatures set a new record in 2025?",
+      description:
+        "[Science] Resolves YES if 2025 was the warmest year on record per NOAA/NASA. Resolved as NO.",
+      category: "Science",
+      status: "RESOLVED",
+      outcome: "NO",
+      outcomeOffsetDays: -60,
     },
   ];
 
+  const now = Date.now();
   let created = 0;
-  for (const m of sampleMarkets) {
-    const existing = await prisma.market.findFirst({ where: { title: m.title } });
+  let skipped = 0;
+  for (const p of sampleProducts) {
+    const existing = await prisma.product.findFirst({ where: { name: p.name } });
     if (existing) {
-      console.log(`Market already exists: ${m.title}`);
+      console.log(`Product already exists: ${p.name}`);
+      skipped++;
       continue;
     }
-    const market = await prisma.market.create({
+    const outcomeTime = new Date(now + p.outcomeOffsetDays * 24 * 60 * 60 * 1000);
+    const product = await prisma.product.create({
       data: {
-        ...m,
-        status: "ACTIVE",
+        name: p.name,
+        description: p.description,
+        status: p.status,
+        outcome: p.outcome,
+        outcomeTime,
         creatorId: admin.id,
-        outcomes: {
-          create: [
-            { label: "YES" },
-            { label: "NO" },
-          ],
-        },
       },
     });
     created++;
-    console.log(`Seeded market: ${market.title} (id=${market.id})`);
+    console.log(
+      `Seeded product: ${product.name} (${product.status}${p.outcome ? `/${p.outcome}` : ""}) id=${product.id}`
+    );
   }
-  console.log(`Seeded ${created} new market(s)`);
+  console.log(`Seeded ${created} new product(s), ${skipped} already existed.`);
 }
 
 main()
