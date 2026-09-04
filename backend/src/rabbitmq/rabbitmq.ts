@@ -5,7 +5,7 @@ const url = process.env.RABBITMQ_URL ?? "amqp://localhost:5672";
 
 const connection = await connect(url);
 
-connection.on("error", (err) => {
+connection.on("error", (err: unknown) => {
   logger.error("rabbitmq.connection_error", {}, err);
 });
 
