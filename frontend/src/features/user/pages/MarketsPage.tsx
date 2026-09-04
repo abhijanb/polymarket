@@ -1,5 +1,8 @@
 import { useGetActiveMarketsQuery } from "@/features/user/api/marketsApi";
+import { usePlaceOrderMutation } from "@/features/user/api/ordersApi";
+import { useState } from "react";
 import { cn } from "@/shared/lib/utils";
+import { PlaceOrderModal } from "@/features/user/components/PlaceOrderModal";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Crypto: "bg-blue-500/20 text-blue-400 border-blue-500/30",
@@ -27,6 +30,11 @@ function truncate(text: string, max = 180): string {
 
 export function MarketsPage() {
   const { data: markets = [], isLoading, isUninitialized, error, refetch } = useGetActiveMarketsQuery();
+  const [selectedMarket, setSelectedMarket] = useState<(typeof markets)[number] | null>(null);
+
+  const handleOrderSuccess = () => {
+    refetch();
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -139,12 +147,29 @@ export function MarketsPage() {
                   ) : (
                     <span />
                   )}
+                  {m.status === "ACTIVE" && !m.outcome && (
+                    <button
+                      onClick={() => setSelectedMarket(m)}
+                      className="px-3 py-1.5 bg-primary text-on-primary text-[12px] font-bold rounded-sm hover:opacity-90 transition-opacity"
+                      style={{ fontFamily: "JetBrains Mono" }}
+                    >
+                      PLACE ORDER
+                    </button>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
       )}
+
+      <PlaceOrderModal
+        key={selectedMarket?.id}
+        open={!!selectedMarket}
+        onClose={() => setSelectedMarket(null)}
+        market={selectedMarket}
+        onSuccess={handleOrderSuccess}
+      />
     </div>
   );
 }
