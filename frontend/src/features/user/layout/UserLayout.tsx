@@ -43,6 +43,18 @@ export function UserLayout() {
           >
             PREDICTX
           </Link>
+          <nav className="flex items-center gap-1">
+            <Link
+              to="/user/markets"
+              className={cn(
+                "px-3 py-1.5 rounded-sm text-[13px] font-medium transition-colors",
+                "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low"
+              )}
+              style={{ fontFamily: "JetBrains Mono" }}
+            >
+              Markets
+            </Link>
+          </nav>
         </div>
         <div className="flex items-center gap-3">
           <button

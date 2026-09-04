@@ -5,6 +5,7 @@ import cors from "cors";
 import { authRouter } from "./src/features/auth/route";
 import { userRouter } from "./src/features/user/route";
 import { adminRouter } from "./src/features/admin/route";
+import { marketRouter } from "./src/features/market/route";
 import { meController } from "./src/features/auth/controller/meController";
 import { errorHandler } from "./src/middlewares/errorHandler";
 import { requestId } from "./src/middlewares/requestId";
@@ -33,6 +34,7 @@ app.use(httpLogger);
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/markets", marketRouter);
 
 app.get("/health", async (_req, res) => {
   try {
