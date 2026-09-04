@@ -22,11 +22,12 @@ interface PlaceOrderArgs {
 
 export async function placeOrder({ userId, productId, outcome, shares, pricePerShareCents }: PlaceOrderArgs) {
   logger.debug("order.service.place.start", { userId, productId, shares });
+  let outcomeTime: Date | null = null;
   const result = await prisma.$transaction(
     async (tx) => {
       const product = await tx.product.findUnique({
         where: { id: productId },
-        select: { id: true, status: true, name: true, outcome: true },
+        select: { id: true, status: true, name: true, outcome: true, outcomeTime: true },
       });
 
       if (!product) {
@@ -41,6 +42,8 @@ export async function placeOrder({ userId, productId, outcome, shares, pricePerS
         });
         throw new OrderError(400, "Product is not active");
       }
+
+      outcomeTime = product.outcomeTime;
 
       const user = await tx.user.findUnique({
         where: { id: userId },
@@ -114,7 +117,7 @@ export async function placeOrder({ userId, productId, outcome, shares, pricePerS
     shares: result.order.shares,
     pricePerShareCents: result.order.pricePerShareCents,
     createdAt: result.order.createdAt.toISOString(),
-  }).catch((err) =>
+  }, { outcomeTime }).catch((err) =>
     logger.warn("order.redis_cache_failed", { orderId: result.order.id }, err),
   );
 
