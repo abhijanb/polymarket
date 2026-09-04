@@ -1,6 +1,7 @@
 import { prisma } from "../../../lib/prisma";
 import { Prisma } from "../../../generated/prisma/client";
 import { logger } from "../../../lib/logger";
+import { saveOrder } from "../../../redis/redis.service";
 import { deriveResult } from "../lib/result";
 import type { OrderResult } from "../lib/result";
 import { getOrdersForUser as _getOrdersForUser } from "../lib/orders";
@@ -21,7 +22,7 @@ interface PlaceOrderArgs {
 
 export async function placeOrder({ userId, productId, outcome, shares, pricePerShareCents }: PlaceOrderArgs) {
   logger.debug("order.service.place.start", { userId, productId, shares });
-  return prisma.$transaction(
+  const result = await prisma.$transaction(
     async (tx) => {
       const product = await tx.product.findUnique({
         where: { id: productId },
@@ -106,6 +107,18 @@ export async function placeOrder({ userId, productId, outcome, shares, pricePerS
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
   );
+
+  void saveOrder({
+    orderId: result.order.id,
+    productId: result.order.productId,
+    shares: result.order.shares,
+    pricePerShareCents: result.order.pricePerShareCents,
+    createdAt: result.order.createdAt.toISOString(),
+  }).catch((err) =>
+    logger.warn("order.redis_cache_failed", { orderId: result.order.id }, err),
+  );
+
+  return result;
 }
 
 export async function getUserOrders(userId: string) {
